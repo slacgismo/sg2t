@@ -1,0 +1,7 @@
+README.md
+setup.py
+sg2t_load_composition_analysis.egg-info/PKG-INFO
+sg2t_load_composition_analysis.egg-info/SOURCES.txt
+sg2t_load_composition_analysis.egg-info/dependency_links.txt
+sg2t_load_composition_analysis.egg-info/not-zip-safe
+sg2t_load_composition_analysis.egg-info/top_level.txt
