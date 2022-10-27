@@ -1,7 +1,0 @@
-README.md
-setup.py
-sg2t_advanced_load_modeling.egg-info/PKG-INFO
-sg2t_advanced_load_modeling.egg-info/SOURCES.txt
-sg2t_advanced_load_modeling.egg-info/dependency_links.txt
-sg2t_advanced_load_modeling.egg-info/not-zip-safe
-sg2t_advanced_load_modeling.egg-info/top_level.txt
