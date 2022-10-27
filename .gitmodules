@@ -1,0 +1,3 @@
+[submodule "sg2t/sg2t-loadshape"]
+	path = sg2t/sg2t-loadshape
+	url = https://github.com/slacgismo/sg2t-loadshape.git
