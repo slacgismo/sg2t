@@ -4,8 +4,6 @@ Import TMY3 data and obtain dataframe
 ====================================
 This example demonstrates how to import a TMY data
 file and read it with the sg2t.weather package.
-, `astropy.io.fits` to open
-the file, and `matplotlib.pyplot` to display the image.
 """
 # TODO Use `sg2t.utils.data` to download the file
 
