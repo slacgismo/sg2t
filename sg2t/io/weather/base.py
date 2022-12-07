@@ -61,7 +61,7 @@ class IOBase:
             raise FileNotFoundError(f'File not found: {self.data_filename}')
 
         # Add source filename to metadata
-        self.metadata["filename"] = self.data_filename
+        self.metadata["file"]["filename"] = self.data_filename
         # Data should preferably be loaded with pandas
         self.data = pd.read_table(self.data_filename)
 

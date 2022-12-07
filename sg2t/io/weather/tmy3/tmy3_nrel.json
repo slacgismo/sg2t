@@ -1,10 +1,10 @@
-{"metadata": {
+{"file": {
     "server": "https://github.com/",
     "organization": "slacgismo",
     "repository": "sg2t",
     "branch": "main",
     "country": "US",
-    "index_name": ".index",
+    "index_filename": ".index",
     "format": "tmy3"
 },
   "columns": {
