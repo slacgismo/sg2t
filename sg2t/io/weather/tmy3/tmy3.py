@@ -9,7 +9,7 @@ from sg2t.io.weather.base import IOBase
 #from sg2t.io.tmy3 import converters
 from sg2t.config import load_config
 
-package_dir = os.path.abspath(__file__ + "/../../../")
+package_dir = os.path.abspath(__file__ + "/../../../../")
 cache_dir = f"{package_dir}/weather/data/tmy3"
 
 if not os.path.exists(cache_dir):
@@ -93,6 +93,7 @@ class TMY3(IOBase):
             if cache_filename_only:
                 return cache_file
             with open(cache_file, "rt") as f:
+                # this works print(f.read())
                 return f.read()
 
         url = f"{self.config['server']}" \

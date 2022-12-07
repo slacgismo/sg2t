@@ -11,6 +11,7 @@ class TestTMY3(unittest.TestCase):
         files_dir = f"{package_dir}/io/weather/tmy3/"
         config_dir = f"{package_dir}/config/"
 
+        print(files_dir)
         tmy3  = TMY3(
             config_name=config_dir+"config.ini",
             config_key="data.tmy3",
