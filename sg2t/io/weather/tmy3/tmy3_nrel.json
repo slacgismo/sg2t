@@ -36,7 +36,7 @@
     "Lprecip depth (mm)" : "lprecipdepth",
     "Lprecip quantity (hr)" : "lprecipquantity"
   },
-  "units": {
+  "col_units": {
     "etr" : "W/m^2",
     "etrn" : "W/m^2",
     "ghi" : "W/m^2",

@@ -7,11 +7,13 @@ import datetime
 import requests
 
 from sg2t.io.weather.base import IOBase
-#from sg2t.io.tmy3 import converters
 from sg2t.config import load_config
+from sg2t.io.schemas import weather_schema
+
 
 package_dir = os.path.abspath(__file__ + "/../../../../")
-cache_dir = f"{package_dir}/weather/data/tmy3"
+cache_dir = f"{package_dir}/weather/data/tmy3/US/"
+temp_dir =  f"{package_dir}/data/temp/"
 
 if not os.path.exists(cache_dir):
     os.makedirs(cache_dir,exist_ok=True)
@@ -107,17 +109,50 @@ class TMY3(IOBase):
         json.dump(self.metadata, out_file, indent=6, cls=NpEncoder)
         out_file.close()
 
+    def create_sg2t_schema(self):
+        sg2t_export = {}
 
+        columns = list(weather_schema["properties"].keys())
+        required = weather_schema["required"]
 
-        # self.dataframe.index.name = "Hour"
-        # self.dataframe.insert(0,'DateTime',
-        #                       list(map(lambda x,y: datetime.datetime(x.year,x.month,x.day,y.hour),
-        #                                *(self.dataframe['Date (MM/DD/YYYY)'],
-        #                                  self.dataframe['Time (HH:MM)']))))
-        # # for column, name in { get dict from config
-        # #
-        # # }.items():
-        # #     setattr(self,name,self.dataframe[column])
-        # # self.units = { get dict from config
-        # #
-        # # }
+        # tmy3 columns
+        tmy_columns = list(self.metadata["columns"].keys())
+
+        # Map TMY3 data to schema
+        # Currently this is done by hand once here
+        # TODO: automate and cross check with required keys?
+        # date
+        sg2t_export[columns[0]] = self.data[tmy_columns[1]]
+        # time
+        sg2t_export[columns[1]] = self.data[tmy_columns[2]]
+        # drybulb
+        sg2t_export[columns[2]] = self.data[tmy_columns[14]]
+        # humidity
+        sg2t_export[columns[3]] = self.data[tmy_columns[16]]
+        # wind speed
+        sg2t_export[columns[4]] = self.data[tmy_columns[19]]
+
+        # make into DF, clean up, and make standard cols/formats/types based on schema
+        # for now quick export below
+
+    def export_data(self, save_to_file=False):
+        """ Export DataFrame for other sg2t applications.
+
+        Parameters
+        ----------
+        save_to_file : boolean
+            Whether or not to save as CSV file. Optional.
+
+        Returns
+        -------
+        out : pd.DataFrame
+            The formatted DataFrame is returned.
+            If save_to_file is True, CSV files for data and metadata
+            are also saved to a temp directory.
+        """
+
+        # need to update to formatted data
+        name = f"tmy3_{self.state.lower()}_{self.station_name.replace(' ', '_').lower()}"
+        self.data.to_csv(temp_dir + name, index=False)
+
+        # add option to select cols
