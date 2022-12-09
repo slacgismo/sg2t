@@ -152,7 +152,10 @@ class TMY3(IOBase):
         """
 
         # need to update to formatted data
-        name = f"tmy3_{self.state.lower()}_{self.station_name.replace(' ', '_').lower()}"
-        self.data.to_csv(temp_dir + name, index=False)
+        if save_to_file:
+            name = f"tmy3_{self.state.lower()}_{self.station_name.replace(' ', '_').lower()}"
+            self.data.to_csv(temp_dir + name, index=False)
 
         # add option to select cols
+        # pass df
+        return self.data

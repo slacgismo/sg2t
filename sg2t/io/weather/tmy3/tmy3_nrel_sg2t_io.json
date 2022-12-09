@@ -7,7 +7,7 @@
             "country": "US",
             "index_filename": ".index",
             "format": "tmy3",
-            "filename": "/Users/smiskov/Documents/SLAC/AED/ALM/slac-gismo-grid-tools/sg2t/weather/data/tmy3/AK-Bethel_Airport.tmy3"
+            "filename": "/Users/smiskov/Documents/SLAC/AED/ALM/slac-gismo-grid-tools/sg2t/weather/data/tmy3/US/AK-Ambler.tmy3"
       },
       "columns": {
             "DateTime": "datetime",
@@ -137,12 +137,12 @@
             "PresWth uncert (code)": "int"
       },
       "station": {
-            "station_number": 702190,
-            "station_name": "BETHEL AIRPORT",
+            "station_number": 701718,
+            "station_name": "AMBLER",
             "state": "AK",
             "tzoffset": -9.0,
-            "latitude": 60.783,
-            "longitude": -161.833,
-            "elevation": 38
+            "latitude": 67.1,
+            "longitude": -157.85,
+            "elevation": 88
       }
 }
