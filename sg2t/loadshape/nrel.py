@@ -1,6 +1,6 @@
 import pandas as pd
 from sg2t.loadshape import Data
-
+# this file should move to sg2t.io
 class ResStock(Data):
     """Module for importing data from NREL's ResStock
      dataset into sg2t tools.

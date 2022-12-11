@@ -30,7 +30,6 @@ tmy_data.metadata()
 
 # Export data in format suitable for sg2t analysis
 # Other options should include CSV file
-# TODO: metadata for CSV etc exports
 sg2t_weather_data = tmy_data.export("sg2t")
 
 ##############################################################################

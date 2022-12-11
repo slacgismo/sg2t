@@ -1,10 +1,12 @@
-{
-  "server": "https://github.com/",
-  "organization": "slacgismo",
-  "repository": "sg2t",
-  "branch": "main",
-  "country": "US",
-  "index_name": ".index",
+{"file": {
+    "server": "https://github.com/",
+    "organization": "slacgismo",
+    "repository": "sg2t",
+    "branch": "main",
+    "country": "US",
+    "index_filename": ".index",
+    "format": "tmy3"
+},
   "columns": {
     "DateTime" : "datetime",
     "Date (MM/DD/YYYY)" : "date",
@@ -34,7 +36,7 @@
     "Lprecip depth (mm)" : "lprecipdepth",
     "Lprecip quantity (hr)" : "lprecipquantity"
   },
-  "units": {
+  "col_units": {
     "etr" : "W/m^2",
     "etrn" : "W/m^2",
     "ghi" : "W/m^2",

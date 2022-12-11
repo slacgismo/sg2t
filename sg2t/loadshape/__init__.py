@@ -1,5 +1,5 @@
-"""
-This is the docstring for the examplesubpkg package.  Normally you would
-have whatever.py files in this directory implementing some modules, but this
-is just an example sub-package, so it doesn't actually do anything.
+"""This is the sg2t.loadshape package that handles all loadshape
+timeseries manipulation and analysis. All data imported/passed
+to this packages/its submodules should follow the sg2t loadshape
+data format as defined in sg2t.io.
 """
