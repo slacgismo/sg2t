@@ -4,6 +4,18 @@
 import json
 
 
+metadata_schema = {
+    "title": "Metadata",
+    "type": "object",
+    "properties": {
+        "file": {"type": "dict"},
+        "columns": {"type": "dict"},
+        "col_types": {"type": "dict"},
+        "col_units": {"type": "dict"},
+    },
+}
+
+
 weather_schema = {
     "title": "Weather data",
     "type": "object",
@@ -16,3 +28,4 @@ weather_schema = {
     },
     "required": ["date", "time", "drybulb"],
 }
+

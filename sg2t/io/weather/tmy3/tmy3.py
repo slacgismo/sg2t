@@ -1,22 +1,23 @@
 """Module for TMY3 data, adapted from  GridLAB-D"""
 import os, sys
-import json
-import pandas as pd
-from sg2t.utils.saving import NpEncoder as NpEncoder
 import datetime
 import requests
+
+import json
+import pandas as pd
 
 from sg2t.io.weather.base import IOBase
 from sg2t.config import load_config
 from sg2t.io.schemas import weather_schema
+from sg2t.utils.saving import NpEncoder as NpEncoder
 
 
-package_dir = os.path.abspath(__file__ + "/../../../../")
+package_dir = os.environ["SG2T_HOME"]
+# tmy3 data cache
 cache_dir = f"{package_dir}/weather/data/tmy3/US/"
-temp_dir =  f"{package_dir}/data/temp/"
+# package cache
+temp_dir =  os.environ["SG2T_CACHE"]
 
-if not os.path.exists(cache_dir):
-    os.makedirs(cache_dir,exist_ok=True)
 
 class TMY3(IOBase):
     """TMY3 weather data file type implementation for basic i/o.
@@ -101,15 +102,17 @@ class TMY3(IOBase):
             setattr(self, item, info[item][0])
             self.metadata["station"][item] = info[item][0]
 
-
         # Add to metadata.json
         # Rename file for now to avoid data loss
         new_name = self.metadata_file[:-5] + "_sg2t_io.json"
-        out_file = open(new_name, "w")
-        json.dump(self.metadata, out_file, indent=6, cls=NpEncoder)
-        out_file.close()
+        outfile = open(new_name, "w")
+        json.dump(self.metadata, outfile, cls=NpEncoder)
+        outfile.close()
 
     def create_sg2t_schema(self):
+        """Create/adjust DataFrame to follow sg2t schema for use with
+        other sg2t packages."""
+        # TODO: finish implementation
         sg2t_export = {}
 
         columns = list(weather_schema["properties"].keys())
@@ -135,27 +138,40 @@ class TMY3(IOBase):
         # make into DF, clean up, and make standard cols/formats/types based on schema
         # for now quick export below
 
-    def export_data(self, save_to_file=False):
-        """ Export DataFrame for other sg2t applications.
+    def export_data(self,
+                    columns=None,
+                    save_to_file=True,
+                    type="CSV",
+                    filename=None):
+        """Export data from pd.Daframe into a CSV file or into
+        sg2t formatted DataFrame to pass onto sg2t opps.
+        If saving to file, the file will be saved in the cache which
+        can be accessed through os.environ["SG2T_CACHE"].
 
-        Parameters
+        PARAMETERS
         ----------
-        save_to_file : boolean
-            Whether or not to save as CSV file. Optional.
+        columns : list of str
+            List of columns to save/export from DataFrame.
 
-        Returns
+        save_to_file : bool
+            Whether to save to file. If false, it will only return the formatted DF.
+
+        type : str
+            Type of file to save data as. Currently only supports CSV.
+
+        filename : str
+            Name of output file. It will append a timestamp to that.
+
+        RETURNS
         -------
-        out : pd.DataFrame
-            The formatted DataFrame is returned.
-            If save_to_file is True, CSV files for data and metadata
-            are also saved to a temp directory.
+        out : pd.DataFrame and json metadata filename
+            DataFrame of data if it exists.
         """
-
         # need to update to formatted data
         if save_to_file:
-            name = f"tmy3_{self.state.lower()}_{self.station_name.replace(' ', '_').lower()}"
-            self.data.to_csv(temp_dir + name, index=False)
+            filename = f"tmy3_{self.state.lower()}_{self.station_name.replace(' ', '_').lower()}"
 
-        # add option to select cols
+        self.export(columns=columns, save_to_file=save_to_file, filename=filename)
+
         # pass df
         return self.data

@@ -1,27 +1,48 @@
 """This is the base class for defining
 a 'io.type.Class' for a given data structure. """
 import os
-import json
 import datetime
+
+import json
 import pandas as pd
 
 from sg2t.config import load_config
+from sg2t.io.schemas import metadata_schema
+from sg2t.utils.saving import NpEncoder as NpEncoder
 
 
 class IOBase:
-    """io base class for defining data structures/sources
+    """I/O base class for defining data structures/sources.
     At initialization:
-        - load config, if any
-        - filename = None
+        - config_name, str, path to config file, if any
+        - config_key, str, if config_name given
+        - metadata_file, str, path to config file, if any
 
     Methods:
+        - load_config
+        - load_metadata
         - get_data (takes filename from user)
-        - export_data (takes format from user)
+        - export (takes format from user)
     """
     def __init__(self,
                  config_name: str,
                  config_key: str,
                  metadata_file: str):
+        """ IO object initialization.
+
+        Parameters
+        ----------
+        config_name : str
+            Name of configuration file in sg2t.config or cache directory, optional.
+
+        config_key : str
+            Key in config corresponding to this class, required if
+            config_name is given.
+
+        metadata_file : str
+            Absolute path to JSON file containing the metadata for this
+             type of data.
+        """
         self.data_filename = None
         self.data = None
         self.config = self.load_config(config_name, config_key)
@@ -29,59 +50,139 @@ class IOBase:
         self.metadata = self.load_metadata(self.metadata_file)
 
     def load_config(self, config_name=None, key=None):
-            """Load TMY3 configuration
-            PARAMETERS:
-                pathname (str)    Pathname of the configuration file to load
-            RETURNS:
-                (dict)            Configuration data loaded
-            """
-            if not config_name and not key:
-                pass
-            if not config_name:
-                # Take default config file
-                config_name = "config.ini"
-            # Load config
-            config = load_config(name=config_name)
-            if key:
-                try:
-                    return config[key]
-                except KeyError:
-                    raise KeyError(f"No key defined in {config_name} for this data.")
+        """Load configuration.
+
+        PARAMETERS
+        ----------
+        config_name : str
+            Name of configuration file in sg2t.config, optional.
+
+        key : str
+            Key in config corresponding to this class, required if
+            config_name is given.
+
+        RETURNS
+        -------
+        config : dict
+            Configuration dict, if any, otherwise None.
+        """
+        if not config_name and not key:
             return None
+        if not config_name:
+            # Take default config file
+            config_name = "config.ini"
+
+        # Load config
+        config = load_config(name=config_name)
+        if key:
+            try:
+                return config[key]
+            except KeyError:
+                raise KeyError(f"No key defined in {config_name} for this data.")
+        return None
     
     def load_metadata(self, filename=None):
-        """Need to have this file """
+        """Load metadata of dataset.
+
+        PARAMETERS
+        ----------
+        filename : str
+            Full path to metadata file.
+
+        RETURNS
+        -------
+        metadata : dict
+            Metadata dict, if any, otherwise a dict w/ no values
+             with keys based on the metadata schema.
+        """
+        if not filename:
+            print("No existing metadata found.")
+            keys = list(metadata_schema["properties"].keys())
+            metadata = {x: {} for x in keys}
+            return metadata
+
         with open(filename) as f:
             # Return metadata dict
            return json.load(f)
 
     def get_data(self, filename=None):
+        """Load data from file into Pandas DataFrame.
+
+        PARAMETERS
+        ----------
+        filename : str
+            Full path to data file.
+
+        RETURNS
+        -------
+        metadata : pd.DataFrame
+            DataFrame of data if it exists.
+        """
         self.data_filename = filename if filename else self.data_filename
-        if not self.data_filename or not os.path.exists(self.data_filename):
+        if not self.data_filename:
+            raise Exception("No data file specified.")
+        elif not os.path.exists(self.data_filename):
             raise FileNotFoundError(f'File not found: {self.data_filename}')
 
         # Add source filename to metadata
         self.metadata["file"]["filename"] = self.data_filename
-        # Data should preferably be loaded with pandas
-        self.data = pd.read_table(self.data_filename)
+        try:
+            # Data should preferably be loaded with pandas
+            self.data = pd.read_table(self.data_filename)
+        except:
+            raise Exception("File could not be loaded with pandas.")
 
         # Returned data has to be a pd.DataFrame
         return self.data
 
-    def export_data(self,
-                    type="CSV",
-                    columns=None,
-                    filename=None):
+    def export(self,
+               columns=None,
+               save_to_file=True,
+               type="CSV",
+               filename=None):
+        """Export data from pd.Daframe into a CSV file or into
+        sg2t formatted DataFrame to pass onto sg2t opps.
+        If saving to file, the file will be saved in the cache which
+        can be accessed through os.environ["SG2T_CACHE"].
+
+        PARAMETERS
+        ----------
+        columns : list of str
+            List of columns to save/export from DataFrame.
+
+        save_to_file : bool
+            Whether to save to file. If false, it will only return the formatted DF.
+
+        type : str
+            Type of file to save data as. Currently only supports CSV.
+
+        filename : str
+            Name of output file. It will append a timestamp to that.
+
+        RETURNS
+        -------
+        out : pd.DataFrame and json metadata filename
+            DataFrame of data if it exists.
+        """
+        if not save_to_file:
+            return self.data
+
         if type=="CSV":
-            timestamp = (datetime.datetime.now()).strftime("%Y-%m-%d_%H-%M-%S-%f")
+            timestamp = (datetime.datetime.now()).strftime("%Y-%m-%d_%H-%M-%S-%f")[:-4]
             if not filename:
                 filename = f"sg2t_base_data_{timestamp}"
+                metada_filename = f"sg2t_base_metadata_{timestamp}"
             else:
                 filename = filename + "_" + timestamp
-            self.data.to_csv(filename, columns=columns)
+                metadata_filename = f"metadata_{filename}"
+
+            cache_dir = os.environ["SG2T_CACHE"]
+            filename = os.path.join(cache_dir, filename) + ".csv"
+            metadata_filename = os.path.join(cache_dir, metadata_filename) + ".json"
+
+            self.data.to_csv(filename, columns=columns, index=False)
             # Save metadata as well
-            # TODO: adjust metadata to only include info about saved columns, or keep all?
-            with open(f"sg2t_base_metadata_{timestamp}.json", "w") as outfile:
-                json.dump(self.metadata, outfile)
+            with open(metadata_filename, "w") as outfile:
+                json.dump(self.metadata, outfile, cls=NpEncoder)
         else:
             raise NotImplementedError("Only saving to CSV format currently supported.")

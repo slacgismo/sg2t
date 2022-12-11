@@ -2,11 +2,11 @@ import unittest
 import os
 from sg2t.io.weather.tmy3 import TMY3
 
+# TODO: remove dependencies on other methods
 
 class TestTMY3(unittest.TestCase):
 
     def test_get_index(self):
-        # TODO: remove dependency on other methods
         package_dir = os.path.abspath(__file__ + "/../../../")
         files_dir = f"{package_dir}/io/weather/tmy3/"
         config_dir = f"{package_dir}/config/"
@@ -20,7 +20,6 @@ class TestTMY3(unittest.TestCase):
         self.assertEqual(tmy3.get_index()[0], "AK-Adak_Nas.tmy3")
 
     def test_get_data(self):
-        # TODO: remove dependency on other methods
         package_dir = os.path.abspath(__file__ + "/../../../")
         files_dir = f"{package_dir}/io/weather/tmy3/"
         config_dir = f"{package_dir}/config/"

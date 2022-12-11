@@ -1,11 +1,11 @@
 """This is the main class for working with weather data."""
 import os
-import json
 import datetime
 from math import sqrt
 
 import numpy as np
 import pandas as pd
+import json
 
 from sg2t.config import load_config
 
@@ -14,17 +14,7 @@ from sg2t.config import load_config
 
 
 class Weather:
-    """Weather class for working with weather data.
-    At initialization:
-        - load config, if any
-        - filename = None
-
-    Methods:
-        - import_data (takes filename from user)
-        - get_heat_index
-        - plot
-        - export
-    """
+    """Weather class for working with weather data."""
     def __init__(self,
                  data,
                  config_name="config.ini",
@@ -57,11 +47,13 @@ class Weather:
 
     # TODO: move the two methods below to utils?
     def load_config(self, config_name=None, key=None):
-        """Load TMY3 configuration
+        """Load weather configuration.
+
         Parameters
         ----------
         pathname : str
             Pathname of the configuration file to load
+
         Returns
         -------
         out : dict
