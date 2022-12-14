@@ -108,8 +108,6 @@ class TMY3(IOBase):
             setattr(self, item, info[item][0])
             self.metadata["station"][item] = info[item][0]
 
-
-
         # Returned data has to be a pd.DataFrame
         # This is the data as-is from the tmy3 files
         # Switch to standard format
@@ -149,6 +147,8 @@ class TMY3(IOBase):
             data[key] = raw_data[self.keys_map[key]]
 
         self.data = data
+        self.data['Date'] = pd.to_datetime(self.data['Date'])
+        self.data.set_index(['Date'])
 
     def export_data(self,
                     columns=None,

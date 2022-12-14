@@ -77,7 +77,7 @@ class Weather:
         """
         return load_metadata(filename)
 
-    def plot(self, x_key, y_key, **kwargs):
+    def plot(self, x_key, y_key, linewidth=0, marker=".", **kwargs):
         """Method for plotting the weather data.
         Uses pd.DataFrame.plot() method.
 
@@ -95,18 +95,65 @@ class Weather:
                 ""
         else:
             x_units = ""
-
-        if y_key in self.metadata["col_units"].keys():
-            y_units = "(" + self.metadata["col_units"][y_key] + ")" if \
-                self.metadata["col_units"][y_key] != "None" else\
-                ""
-        else:
-            y_units = ""
-
         x_label = f"{x_key} {x_units}"
-        y_label = fr"{y_key} {y_units}"
 
-        self.data.plot( x_key, y_key, xlabel=x_label, ylabel=y_label, **kwargs)
+        if isinstance(y_key, list) and len(y_key) > 1:
+            # if only plotting more than one col
+            y_units = ""  # does not add unit info if plotting more than 1
+            y_label = None
+        else:
+            # if plotting one col
+            if y_key in self.metadata["col_units"].keys():
+                y_units = "(" + self.metadata["col_units"][y_key] + ")" if \
+                    self.metadata["col_units"][y_key] != "None" else ""
+                y_label = fr"{y_key} {y_units}"
+            else:
+                # if no unit info
+                y_units = ""
+                y_label = fr"{y_key} {y_units}"
+
+        self.data.plot( x_key,
+                        y_key,
+                        xlabel=x_label,
+                        ylabel=y_label,
+                        linewidth=linewidth,
+                        marker=marker,
+                        **kwargs)
+
+    def between_dates(self, start, end, columns=None):
+        """Method to get data between two specific dates.
+         Includes both end-points in the result *if* they
+         are in the index. Columns optional otherwise all
+         are returned.
+
+        Parameters
+        ----------
+        start : str
+            Start date in form 'YYYY-M-D'.
+
+        end : str
+            End date in form 'YYYY-M-D'.
+
+        columns : list of str
+            List of columns to include. Optional.
+
+        Returns
+        -------
+        out : pandas.DataFrame
+            Returns the subset of the original DF that
+             falls between start and end.
+        """
+        # check that date col is datetime object?
+        # or do validation at instantiation?
+        l_cond = self.data['Date'] > start
+        r_cond = self.data['Date'] <= end
+        data_cond = self.data[(l_cond) & (r_cond)]
+
+        if columns:
+            data_cond = data_cond[columns]
+
+        return data_cond
+
 
     def get_hi(self):
         """Method to calculate the heat index (HI) of weather data.
