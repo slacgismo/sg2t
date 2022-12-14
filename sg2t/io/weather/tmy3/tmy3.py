@@ -10,12 +10,13 @@ from sg2t.io.weather.base import IOBase
 from sg2t.config import load_config
 from sg2t.io.schemas import weather_schema
 from sg2t.utils.saving import NpEncoder as NpEncoder
+from sg2t.io.weather.tmy3.mapping import get_map
 
 
 package_dir = os.environ["SG2T_HOME"]
-# tmy3 data cache
+# TMY3 data cache
 cache_dir = f"{package_dir}/weather/data/tmy3/US/"
-# package cache
+# Package cache
 temp_dir =  os.environ["SG2T_CACHE"]
 
 
@@ -65,7 +66,7 @@ class TMY3(IOBase):
 
         return sorted(indices.strip().split("\n"))
 
-    def get_dataframe(self, filename):
+    def get_data(self, filename):
         """Get raw TMY3 data in DataFrame format.
 
         PARAMETERS
@@ -92,51 +93,62 @@ class TMY3(IOBase):
         metadata_rows = 1
         self.data = pd.read_csv(self.data_filename, skiprows=metadata_rows)
 
-        # Parse metadata from TMY3
+        # Parse metadata from first row of TMY3
         self.metadata["station"] = {}
-        metadata_keys = ["station_number","station_name","state",
-                         "tzoffset","latitude","longitude","elevation"]
+        metadata_keys = ["station_number",
+                         "station_name",
+                         "state",
+                         "tzoffset",
+                         "latitude",
+                         "longitude",
+                         "elevation"]
         info = pd.read_csv(self.data_filename, nrows=1, names=metadata_keys)
 
         for item in info.columns:
             setattr(self, item, info[item][0])
             self.metadata["station"][item] = info[item][0]
 
+
+
+        # Returned data has to be a pd.DataFrame
+        # This is the data as-is from the tmy3 files
+        # Switch to standard format
+        self.format_data()
+
         # Add to metadata.json
+        self.metadata["columns"] = self.keys_map
+
+        cols_list = list(self.keys_map.keys())
+        units_list = [self._units(key) for key in cols_list]
+        iterable = zip(cols_list, units_list)
+        self.metadata["col_units"] = {key: value for (key, value) in iterable}
+
         # Rename file for now to avoid data loss
         new_name = self.metadata_file[:-5] + "_sg2t_io.json"
         outfile = open(new_name, "w")
         json.dump(self.metadata, outfile, cls=NpEncoder)
         outfile.close()
 
-    def create_sg2t_schema(self):
-        """Create/adjust DataFrame to follow sg2t schema for use with
-        other sg2t packages."""
-        # TODO: finish implementation
-        sg2t_export = {}
+        return self.data
 
-        columns = list(weather_schema["properties"].keys())
-        required = weather_schema["required"]
+    def format_data(self):
+        """Changes the format of the loaded tmy3 data self.data to follow
+        a standard format with standard column names. See `mapping.py`.
 
-        # tmy3 columns
-        tmy_columns = list(self.metadata["columns"].keys())
+        This only reorders the columns, putting required ones first, and others
+        next, and removes redundant/unused columns.
+        """
+        self.keys_map = get_map()
+        # Save original dataframe
+        raw_data = self.data
+        # Create new dataframe
+        cols = list(self.keys_map.keys())
+        data = pd.DataFrame(columns=cols)
 
-        # Map TMY3 data to schema
-        # Currently this is done by hand once here
-        # TODO: automate and cross check with required keys?
-        # date
-        sg2t_export[columns[0]] = self.data[tmy_columns[1]]
-        # time
-        sg2t_export[columns[1]] = self.data[tmy_columns[2]]
-        # drybulb
-        sg2t_export[columns[2]] = self.data[tmy_columns[14]]
-        # humidity
-        sg2t_export[columns[3]] = self.data[tmy_columns[16]]
-        # wind speed
-        sg2t_export[columns[4]] = self.data[tmy_columns[19]]
+        for key in list(self.keys_map.keys()):
+            data[key] = raw_data[self.keys_map[key]]
 
-        # make into DF, clean up, and make standard cols/formats/types based on schema
-        # for now quick export below
+        self.data = data
 
     def export_data(self,
                     columns=None,
@@ -175,3 +187,37 @@ class TMY3(IOBase):
 
         # pass df
         return self.data
+
+    def _units(self, key):
+        """Method to get the unit corresponding to column
+        from old mapping.
+
+        PARAMETERS
+        ----------
+        key : str
+            Column name.
+
+        RETURNS
+        -------
+        unit : str
+            String of unit.
+        """
+        data_key = self.keys_map[key]
+        return self.metadata["col_units"][data_key]
+
+    def units(self, key):
+        """Method to get the unit corresponding to column
+        from new mapping.
+
+        PARAMETERS
+        ----------
+        key : str
+            Column name.
+
+        RETURNS
+        -------
+        unit : str
+            String of unit.
+        """
+        return self.metadata["col_units"][key]
+

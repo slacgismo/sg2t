@@ -8,6 +8,7 @@ import pandas as pd
 import json
 
 from sg2t.config import load_config
+from sg2t.utils.io import load_metadata
 
 
 # add here required desc of weather data based on schema
@@ -41,11 +42,10 @@ class Weather:
              type of data.
         """
         self.data = data
-        # self.config = self.load_config(config_name, config_key)
-        # self.metadata_file = metadata_file
-        # self.metadata = self.load_metadata(self.metadata_file)
+        self.config = self.load_config(config_name, config_key)
+        self.metadata_file = metadata_file
+        self.metadata = self.load_metadata(self.metadata_file)
 
-    # TODO: move the two methods below to utils?
     def load_config(self, config_name=None, key=None):
         """Load weather configuration.
 
@@ -59,37 +59,62 @@ class Weather:
         out : dict
             Configuration data loaded
         """
-        if not config_name and not key:
-            pass
-        if not config_name:
-            # Take default config file
-            config_name = "config.ini"
-        # Load config
-        config = load_config(name=config_name)
-        if key:
-            try:
-                return config[key]
-            except KeyError:
-                raise KeyError(f"No key defined in {config_name} for this data.")
-        return None
+        return load_config(config_name, key)
 
     def load_metadata(self, filename=None):
-        """Need to have this file """
-        with open(filename) as f:
-            # Return metadata dict
-            return json.load(f)
+        """Load metadata of dataset.
 
-    def plot(self, x_key, y_key):
-        """Method for plotting the weather data"""
-        self.data.plot( x_key, y_key)
+        PARAMETERS
+        ----------
+        filename : str
+            Full path to metadata file.
 
-    def get_hi(self, t, rh):
+        RETURNS
+        -------
+        metadata : dict
+            Metadata dict, if any, otherwise a dict w/ no values
+             with keys based on the metadata schema.
+        """
+        return load_metadata(filename)
+
+    def plot(self, x_key, y_key, **kwargs):
+        """Method for plotting the weather data.
+        Uses pd.DataFrame.plot() method.
+
+        PARAMETERS
+        ----------
+        x_key : str
+            Column name for x-axis data.
+
+        y_key : str
+            Column name for y-axis data.
+        """
+        if x_key in self.metadata["col_units"].keys():
+            x_units = "(" + self.metadata["col_units"][x_key] + ")"  if \
+                self.metadata["col_units"][x_key] != "None" else\
+                ""
+        else:
+            x_units = ""
+
+        if y_key in self.metadata["col_units"].keys():
+            y_units = "(" + self.metadata["col_units"][y_key] + ")" if \
+                self.metadata["col_units"][y_key] != "None" else\
+                ""
+        else:
+            y_units = ""
+
+        x_label = f"{x_key} {x_units}"
+        y_label = fr"{y_key} {y_units}"
+
+        self.data.plot( x_key, y_key, xlabel=x_label, ylabel=y_label, **kwargs)
+
+    def get_hi(self):
         """Method to calculate the heat index (HI) of weather data.
 
         Parameters
         ----------
         t : array
-            Dry bulb temperature in degrees F.
+            Dry bulb temperature in degrees C or F.
 
         rh : array
             Relative humidity in %.
@@ -99,9 +124,33 @@ class Weather:
         out : pandas.Series
             Returns the Series of HI and adds the Series to current data DF.
         """
-        hi_array = np.vectorize(self.heat_index)(t, rh)
-        # add to df and return series
-        return hi_array
+        # Check both exist
+        if "Temperature" not in self.data.columns or \
+                "Rel Humidity" not in self.data.columns:
+            raise("Missing Temperature or Rel Humidity columns for calculating HI.")
+
+        # Data
+        temp = self.data["Temperature"]
+        rh = self.data["Rel Humidity"]
+
+        # Check metadata for units and convert if necessary
+        if "Temperature" in self.metadata["col_units"].keys():
+            if self.metadata["col_units"]["Temperature"] == "degrees C":
+                temp = self.c_to_f(temp)
+        else:
+            print("No metadata to check units. Make sure Temperature is in degrees F. " +
+                  "To convert, use Weather.c_to_f method.")
+
+        # Calculate HI
+        hi_array = np.vectorize(self.heat_index)(temp, rh)
+        # Add to df and metadata and return series
+        self.data["Heat Index"] = hi_array
+        if self.metadata:
+            self.metadata["columns"]["Heat Index"] = "heat index"
+            self.metadata["col_units"]["Heat Index"] = "degrees F"
+            self.metadata["col_types"]["Heat Index"] = "float"
+
+        return self.data["Heat Index"]
 
     @staticmethod
     def heat_index(t, rh):

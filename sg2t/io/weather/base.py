@@ -7,8 +7,8 @@ import json
 import pandas as pd
 
 from sg2t.config import load_config
-from sg2t.io.schemas import metadata_schema
 from sg2t.utils.saving import NpEncoder as NpEncoder
+from sg2t.utils.io import load_metadata
 
 
 class IOBase:
@@ -66,20 +66,7 @@ class IOBase:
         config : dict
             Configuration dict, if any, otherwise None.
         """
-        if not config_name and not key:
-            return None
-        if not config_name:
-            # Take default config file
-            config_name = "config.ini"
-
-        # Load config
-        config = load_config(name=config_name)
-        if key:
-            try:
-                return config[key]
-            except KeyError:
-                raise KeyError(f"No key defined in {config_name} for this data.")
-        return None
+        return load_config(config_name, key)
     
     def load_metadata(self, filename=None):
         """Load metadata of dataset.
@@ -95,15 +82,7 @@ class IOBase:
             Metadata dict, if any, otherwise a dict w/ no values
              with keys based on the metadata schema.
         """
-        if not filename:
-            print("No existing metadata found.")
-            keys = list(metadata_schema["properties"].keys())
-            metadata = {x: {} for x in keys}
-            return metadata
-
-        with open(filename) as f:
-            # Return metadata dict
-           return json.load(f)
+        return load_metadata(filename)
 
     def get_data(self, filename=None):
         """Load data from file into Pandas DataFrame.
@@ -115,7 +94,7 @@ class IOBase:
 
         RETURNS
         -------
-        metadata : pd.DataFrame
+        self.data : pd.DataFrame
             DataFrame of data if it exists.
         """
         self.data_filename = filename if filename else self.data_filename
@@ -132,7 +111,6 @@ class IOBase:
         except:
             raise Exception("File could not be loaded with pandas.")
 
-        # Returned data has to be a pd.DataFrame
         return self.data
 
     def export(self,
