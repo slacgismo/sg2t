@@ -63,6 +63,8 @@ class TMY3(IOBase):
         if os.path.exists(cache_file):
             with open(cache_file, "rt") as f:
                 indices = f.read()
+        else:
+            raise FileNotFoundError(f"No index file provided.")
 
         return sorted(indices.strip().split("\n"))
 
