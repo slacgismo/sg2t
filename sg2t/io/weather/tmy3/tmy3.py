@@ -58,7 +58,8 @@ class TMY3(IOBase):
         """
         index_filename = self.metadata["file"]["index_filename"]
 
-        cache_file = f"{cache_dir}/{index_filename}"
+        cache_file = f"{cache_dir}{index_filename}"
+        print(cache_file)
         if os.path.exists(cache_file):
             with open(cache_file, "rt") as f:
                 indices = f.read()
