@@ -1,7 +1,6 @@
 """Module for TMY3 data, adapted from  GridLAB-D"""
 import os, sys
 import datetime
-import requests
 
 import json
 import pandas as pd
