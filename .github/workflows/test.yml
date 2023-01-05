@@ -26,10 +26,6 @@ jobs:
               sudo $pythonLocation/bin/python3 -m pip install setuptools --upgrade
               $pythonLocation/bin/python3 -m pip list
 
-          - name: Install Package
-            run: |
-              sudo $pythonLocation/bin/python3 -m pip install -e .
-
           - name: Run Unit Tests
             run: sudo $pythonLocation/bin/python3 -m coverage run -m unittest
 

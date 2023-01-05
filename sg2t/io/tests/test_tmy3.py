@@ -5,7 +5,7 @@ from sg2t.io.weather.tmy3 import TMY3
 # TODO: remove dependencies on other methods
 package_dir = os.environ["SG2T_HOME"]
 # TMY3 data cache
-cache_dir = f"{package_dir}/weather/data/tmy3/US/"
+cache_dir = f"{package_dir}/io/tests/data/"
 # Package cache
 temp_dir =  os.environ["SG2T_CACHE"]
 
