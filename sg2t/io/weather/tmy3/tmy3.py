@@ -14,6 +14,7 @@ from sg2t.io.weather.tmy3.mapping import get_map
 
 package_dir = os.environ["SG2T_HOME"]
 # TMY3 data cache
+# Note this is only available locally
 cache_dir = f"{package_dir}/weather/data/tmy3/US/"
 # Package cache
 temp_dir =  os.environ["SG2T_CACHE"]
@@ -47,7 +48,7 @@ class TMY3(IOBase):
         """
         super().__init__(config_name, config_key, metadata_file)
 
-    def get_index(self):
+    def get_index(self, data_dir=cache_dir):
         """Get list of weather stations from index of files.
 
         RETURNS
@@ -57,9 +58,8 @@ class TMY3(IOBase):
             "STATE-weather_station_name.tmy3" sorted alphabetically.
         """
         index_filename = self.metadata["file"]["index_filename"]
+        cache_file = f"{data_dir}{index_filename}"
 
-        cache_file = f"{cache_dir}{index_filename}"
-        print(cache_file)
         if os.path.exists(cache_file):
             with open(cache_file, "rt") as f:
                 indices = f.read()
