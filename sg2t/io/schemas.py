@@ -3,7 +3,6 @@
 # schema for exports from sg2t.io and inputs for other applications.
 import json
 
-
 metadata_schema = {
     "title": "Metadata",
     "type": "object",
@@ -14,7 +13,6 @@ metadata_schema = {
         "col_units": {"type": "dict"},
     },
 }
-
 
 weather_schema = {
     "title": "Weather data",
@@ -27,5 +25,16 @@ weather_schema = {
         "wind_spd": {"type": "float"},
     },
     "required": ["date", "time", "drybulb"],
+}
+
+loadshape_schema = {
+    "title": "Loadshape data",
+    "type": "object",
+    "properties": {
+        "date": {"type": "date"},
+        "time": {"type": "time"},
+        "power": {"type": "float"},
+    },
+    "required": ["date", "time", "power"],
 }
 

@@ -1,0 +1,13 @@
+{
+  "0": "Baseline",
+  "1": "Basic enclosure",
+  "2": "Enhanced enclosure",
+  "3": "Heat pumps, min-efficiency, electric backup",
+  "4": "Heat pumps, high-efficiency, electric backup",
+  "5": "Heat pumps, min-efficiency, existing heating as backup",
+  "6": "Heat pump water heaters",
+  "7": "Whole-home electrification, min efficiency",
+  "8": "Whole-home electrification, high efficiency",
+  "9": "Whole-home electrification, high efficiency + basic enclosure package (packages 1 & 8)",
+  "10": "Whole-home electrification, high efficiency + enhanced enclosure package (packages 2 & 8)"
+}

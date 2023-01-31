@@ -1,0 +1,22 @@
+{ "metadata": {
+    "source": "https://github.com/",
+    "organization": "slacgismo",
+    "repository": "sg2t",
+    "branch": "main",
+    "format": "base",
+},
+  "columns": {
+    "DateTime" : "datetime",
+    "Date (MM/DD/YYYY)" : "date",
+    "Time (HH:MM)" : "hour",
+    "Data (a.u.)" : "data",
+  },
+  "units": {
+    "data" : "a.u.",
+  },
+  "col_types": {
+    "Date (MM/DD/YYYY)" : "date",
+    "Time (HH:MM)" : "time",
+    "Data (au)" : "float",
+  }
+}

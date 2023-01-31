@@ -1,0 +1,114 @@
+timeseries	out.electricity.total.lrmer_95_decarb_by_2035_15_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from electricity using the Cambium 95% Decarbonization by 2035 cost scenario starting in 2025 and levelized over 15 years with a 3% discount rate	n/a
+timeseries	out.fuel_oil.total.lrmer_95_decarb_by_2035_15_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from fuel oil using the Cambium 95% Decarbonization by 2035 cost scenario starting in 2025 and levelized over 15 years with a 3% discount rate	n/a
+timeseries	out.natural_gas.total.lrmer_95_decarb_by_2035_15_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from natural gas using the Cambium 95% Decarbonization by 2035 cost scenario starting in 2025 and levelized over 15 years with a 3% discount rate	n/a
+timeseries	out.propane.total.lrmer_95_decarb_by_2035_15_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from propane using the Cambium 95% Decarbonization by 2035 cost scenario starting in 2025 and levelized over 15 years with a 3% discount rate	n/a
+timeseries	out.electricity.total.lrmer_low_re_cost_15_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from electricity using the Cambium Low RE Cost scenario starting in 2025 and levelized over 15 years with a 3% discount rate	n/a
+timeseries	out.fuel_oil.total.lrmer_low_re_cost_15_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from fuel oil using the Cambium Low RE Cost scenario starting in 2025 and levelized over 15 years with a 3% discount rate	n/a
+timeseries	out.natural_gas.total.lrmer_low_re_cost_15_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from natural gas using the Cambium Low RE Cost scenario starting in 2025 and levelized over 15 years with a 3% discount rate	n/a
+timeseries	out.propane.total.lrmer_low_re_cost_15_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from propane using the Cambium Low RE Cost scenario starting in 2025 and levelized over 15 years with a 3% discount rate	n/a
+timeseries	out.electricity.total.lrmer_low_re_cost_25_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from electricity using the Cambium Low RE Cost scenario starting in 2025 and levelized over 25 years with a 3% discount rate	n/a
+timeseries	out.fuel_oil.total.lrmer_low_re_cost_25_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from fuel oil using the Cambium Low RE Cost scenario starting in 2025 and levelized over 25 years with a 3% discount rate	n/a
+timeseries	out.natural_gas.total.lrmer_low_re_cost_25_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from natural gas using the Cambium Low RE Cost scenario starting in 2025 and levelized over 25 years with a 3% discount rate	n/a
+timeseries	out.propane.total.lrmer_low_re_cost_25_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from propane using the Cambium Low RE Cost scenario starting in 2025 and levelized over 25 years with a 3% discount rate	n/a
+timeseries	out.electricity.total.lrmer_mid_case_15_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from electricity using the Cambium Mid-Case scenario starting in 2025 and levelized over 15 years with a 3% discount rate	n/a
+timeseries	out.fuel_oil.total.lrmer_mid_case_15_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from fuel oil using the Cambium Mid-Case scenario starting in 2025 and levelized over 15 years with a 3% discount rate	n/a
+timeseries	out.natural_gas.total.lrmer_mid_case_15_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from natural gas using the Cambium Mid-Case scenario starting in 2025 and levelized over 15 years with a 3% discount rate	n/a
+timeseries	out.propane.total.lrmer_mid_case_15_2025_start.co2e_kg	float	kg	Long run marginal carbon emissions from propane using the Cambium Mid-Case scenario starting in 2025 and levelized over 15 years with a 3% discount rate	n/a
+timeseries	out.electricity.ceiling_fan.energy_consumption	float	kWh	Electric energy consumed by ceiling fans	n/a
+timeseries	out.electricity.ceiling_fan.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by ceiling fans relative to dwelling unit size	n/a
+timeseries	out.electricity.clothes_dryer.energy_consumption	float	kWh	Electric energy consumed by clothes dryers	n/a
+timeseries	out.electricity.clothes_dryer.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by clothes dryers relative to dwelling unit size	n/a
+timeseries	out.electricity.clothes_washer.energy_consumption	float	kWh	Electric energy consumed by clothes washers	n/a
+timeseries	out.electricity.clothes_washer.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by clothes washers relative to dwelling unit size	n/a
+timeseries	out.electricity.cooling_fans_pumps.energy_consumption	float	kWh	Electric energy consumed by cooling fans and pumps	n/a
+timeseries	out.electricity.cooling_fans_pumps.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by cooling fans and pumps relative to dwelling unit size	n/a
+timeseries	out.electricity.cooling.energy_consumption	float	kWh	Electric energy consumed by electric cooling systems	n/a
+timeseries	out.electricity.cooling.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by electric cooling systems relative to dwelling unit size	n/a
+timeseries	out.electricity.dishwasher.energy_consumption	float	kWh	Electric energy consumed by dishwashers	n/a
+timeseries	out.electricity.dishwasher.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by dishwashers relative to dwelling unit size	n/a
+timeseries	out.electricity.freezer.energy_consumption	float	kWh	Electric energy consumed by freezers	n/a
+timeseries	out.electricity.freezer.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by freezers relative to dwelling unit size	n/a
+timeseries	out.electricity.heating_fans_pumps.energy_consumption	float	kWh	Electric energy consumed by heating fans and pumps	n/a
+timeseries	out.electricity.heating_fans_pumps.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by heating fans and pumps relative to dwelling unit size	n/a
+timeseries	out.electricity.heating_hp_bkup.energy_consumption	float	kWh	Electric backup heating consumption used with heat pump heating systems	n/a
+timeseries	out.electricity.heating_hp_bkup.energy_consumption_intensity	float	kWh/sqft	Electric backup heating consumption used with heat pump heating systems relative to dwelling unit size	n/a
+timeseries	out.electricity.heating.energy_consumption	float	kWh	Electric energy consumed by electric heating systems	n/a
+timeseries	out.electricity.heating.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by electric heating systems relative to dwelling unit size	n/a
+timeseries	out.electricity.hot_tub_heater.energy_consumption	float	kWh	Electric energy consumed by hot tub heaters	n/a
+timeseries	out.electricity.hot_tub_heater.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by hot tub heaters relative to dwelling unit size	n/a
+timeseries	out.electricity.hot_tub_pump.energy_consumption	float	kWh	Electric energy consumed by hot tub pumps	n/a
+timeseries	out.electricity.hot_tub_pump.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by hot tub pumps relative to dwelling unit size	n/a
+timeseries	out.electricity.hot_water.energy_consumption	float	kWh	Electric energy consumed by electric hot water heater	n/a
+timeseries	out.electricity.hot_water.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by electric hot water heater relative to dwelling unit size	n/a
+timeseries	out.electricity.lighting_exterior.energy_consumption	float	kWh	Electric energy consumed by exterior lighting	n/a
+timeseries	out.electricity.lighting_exterior.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by exterior lighting relative to dwelling unit size	n/a
+timeseries	out.electricity.lighting_garage.energy_consumption	float	kWh	Electric energy consumed by garage lighting	n/a
+timeseries	out.electricity.lighting_garage.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by garage lighting relative to dwelling unit size	n/a
+timeseries	out.electricity.lighting_interior.energy_consumption	float	kWh	Electric energy consumed by interior lighting	n/a
+timeseries	out.electricity.lighting_interior.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by interior lighting relative to dwelling unit size	n/a
+timeseries	out.electricity.mech_vent.energy_consumption	float	kWh	Electric energy consumed by mechanical ventilation system	n/a
+timeseries	out.electricity.mech_vent.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by mechanical ventilation system relative to dwelling unit size	n/a
+timeseries	out.electricity.plug_loads.energy_consumption	float	kWh	Electric energy consumed by plug loads	n/a
+timeseries	out.electricity.plug_loads.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by plug loads relative to dwelling unit size	n/a
+timeseries	out.electricity.pool_heater.energy_consumption	float	kWh	Electric energy consumed by pool heaters	n/a
+timeseries	out.electricity.pool_heater.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by pool heaters relative to dwelling unit size	n/a
+timeseries	out.electricity.pool_pump.energy_consumption	float	kWh	Electric energy consumed by pool pumps	n/a
+timeseries	out.electricity.pool_pump.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by pool pumps relative to dwelling unit size	n/a
+timeseries	out.electricity.pv.energy_consumption	float	kWh	Energy produced by rooftop PV systems	n/a
+timeseries	out.electricity.pv.energy_consumption_intensity	float	kWh/sqft	Energy produced by rooftop PV systems relative to dwelling unit size	n/a
+timeseries	out.electricity.range_oven.energy_consumption	float	kWh	Electric energy consumed by cooking range and oven	n/a
+timeseries	out.electricity.range_oven.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by cooking range and oven relative to dwelling unit size	n/a
+timeseries	out.electricity.refrigerator.energy_consumption	float	kWh	Electric energy consumed by primary refrigerator	n/a
+timeseries	out.electricity.refrigerator.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by primary refrigerator relative to dwelling unit size	n/a
+timeseries	out.electricity.well_pump.energy_consumption	float	kWh	Electric energy consumed by well pumps	n/a
+timeseries	out.electricity.well_pump.energy_consumption_intensity	float	kWh/sqft	Electric energy consumed by well pumps relative to dwelling unit size	n/a
+timeseries	out.fuel_oil.heating_hp_bkup.energy_consumption	float	kWh	Energy consumed by fuel oil backup heating used with heat pump heating systems	n/a
+timeseries	out.fuel_oil.heating_hp_bkup.energy_consumption_intensity	float	kWh/sqft	Energy consumed by fuel oil backup heating used with heat pump heating systems relative to dwelling unit size	n/a
+timeseries	out.fuel_oil.heating.energy_consumption	float	kWh	Site fuel oil energy consumption by heating systems	n/a
+timeseries	out.fuel_oil.heating.energy_consumption_intensity	float	kWh/sqft	Site fuel oil energy consumption by heating systems relative to dwelling unit size	n/a
+timeseries	out.fuel_oil.hot_water.energy_consumption	float	kWh	Energy consumed by fuel oil hot water heater	n/a
+timeseries	out.fuel_oil.hot_water.energy_consumption_intensity	float	kWh/sqft	Energy consumed by fuel oil hot water heater relative to dwelling unit size	n/a
+timeseries	out.natural_gas.clothes_dryer.energy_consumption	float	kWh	Energy consumed by natural gas clothes dryers	n/a
+timeseries	out.natural_gas.clothes_dryer.energy_consumption_intensity	float	kWh/sqft	Energy consumed by natural gas clothes dryers relative to dwelling unit size	n/a
+timeseries	out.natural_gas.fireplace.energy_consumption	float	kWh	Energy consumed by natural gas fireplaces	n/a
+timeseries	out.natural_gas.fireplace.energy_consumption_intensity	float	kWh/sqft	Energy consumed by natural gas fireplaces relative to dwelling unit size	n/a
+timeseries	out.natural_gas.grill.energy_consumption	float	kWh	Energy consumed by natural gas grills	n/a
+timeseries	out.natural_gas.grill.energy_consumption_intensity	float	kWh/sqft	Energy consumed by natural gas grills relative to dwelling unit size	n/a
+timeseries	out.natural_gas.heating_hp_bkup.energy_consumption	float	kWh	Energy consumed by natural gas backup heating used with heat pump heating systems	n/a
+timeseries	out.natural_gas.heating_hp_bkup.energy_consumption_intensity	float	kWh/sqft	Energy consumed by natural gas backup heating used with heat pump heating systems relative to dwelling unit size	n/a
+timeseries	out.natural_gas.heating.energy_consumption	float	kWh	Site natural gas energy consumption by heating systems	n/a
+timeseries	out.natural_gas.heating.energy_consumption_intensity	float	kWh/sqft	Site natural gas energy consumption by heating systems relative to dwelling unit size	n/a
+timeseries	out.natural_gas.hot_tub_heater.energy_consumption	float	kWh	Energy consumed by natural gas hot tub heaters	n/a
+timeseries	out.natural_gas.hot_tub_heater.energy_consumption_intensity	float	kWh/sqft	Energy consumed by natural gas hot tub heaters relative to dwelling unit size	n/a
+timeseries	out.natural_gas.hot_water.energy_consumption	float	kWh	Energy consumed by natural gas hot water heater	n/a
+timeseries	out.natural_gas.hot_water.energy_consumption_intensity	float	kWh/sqft	Energy consumed by natural gas hot water heater relative to dwelling unit size	n/a
+timeseries	out.natural_gas.lighting.energy_consumption	float	kWh	Energy consumed by natural gas lighting	n/a
+timeseries	out.natural_gas.lighting.energy_consumption_intensity	float	kWh/sqft	Energy consumed by natural gas lighting relative to dwelling unit size	n/a
+timeseries	out.natural_gas.pool_heater.energy_consumption	float	kWh	Energy consumed by natural gas pool heaters	n/a
+timeseries	out.natural_gas.pool_heater.energy_consumption_intensity	float	kWh/sqft	Energy consumed by natural gas pool heaters relative to dwelling unit size	n/a
+timeseries	out.natural_gas.range_oven.energy_consumption	float	kWh	Energy consumed by natural gas range ovens	n/a
+timeseries	out.natural_gas.range_oven.energy_consumption_intensity	float	kWh/sqft	Energy consumed by natural gas range ovens relative to dwelling unit size	n/a
+timeseries	out.propane.clothes_dryer.energy_consumption	float	kWh	Energy consumed by propane clothes dryers	n/a
+timeseries	out.propane.clothes_dryer.energy_consumption_intensity	float	kWh/sqft	Energy consumed by propane clothes dryers relative to dwelling unit size	n/a
+timeseries	out.propane.heating_hp_bkup.energy_consumption	float	kWh	Energy consumed by propane backup heating used with heat pump heating systems	n/a
+timeseries	out.propane.heating_hp_bkup.energy_consumption_intensity	float	kWh/sqft	Energy consumed by propane backup heating used with heat pump heating systems relative to dwelling unit size	n/a
+timeseries	out.propane.heating.energy_consumption	float	kWh	Site propane energy consumption by heating systems	n/a
+timeseries	out.propane.heating.energy_consumption_intensity	float	kWh/sqft	Site propane energy consumption by heating systems relative to dwelling unit size	n/a
+timeseries	out.propane.hot_water.energy_consumption	float	kWh	Energy consumed by propane hot water heater	n/a
+timeseries	out.propane.hot_water.energy_consumption_intensity	float	kWh/sqft	Energy consumed by propane hot water heater relative to dwelling unit size	n/a
+timeseries	out.propane.range_oven.energy_consumption	float	kWh	Energy consumed by propane range oven	n/a
+timeseries	out.propane.range_oven.energy_consumption_intensity	float	kWh/sqft	Energy consumed by propane range oven relative to dwelling unit size	n/a
+timeseries	out.electricity.net.energy_consumption	float	kWh	Total electricity consumption minus on-site electricity production	n/a
+timeseries	out.electricity.net.energy_consumption_intensity	float	kWh/sqft	Total electricity consumption minus on-site electricity production relative to dwelling unit size	n/a
+timeseries	out.electricity.total.energy_consumption	float	kWh	Site total electric energy consumed	n/a
+timeseries	out.electricity.total.energy_consumption_intensity	float	kWh/sqft	Site total electric energy consumed relative to dwelling unit size	n/a
+timeseries	out.fuel_oil.total.energy_consumption	float	kWh	Site total fuel oil energy consumed	n/a
+timeseries	out.fuel_oil.total.energy_consumption_intensity	float	kWh/sqft	Site total fuel oil energy consumed relative to dwelling unit size	n/a
+timeseries	out.natural_gas.total.energy_consumption	float	kWh	Site total natural gas energy consumed	n/a
+timeseries	out.natural_gas.total.energy_consumption_intensity	float	kWh/sqft	Site total natural gas energy consumed relative to dwelling unit size	n/a
+timeseries	out.propane.total.energy_consumption	float	kWh	Site total propane energy consumed	n/a
+timeseries	out.propane.total.energy_consumption_intensity	float	kWh/sqft	Site total propane energy consumed relative to dwelling unit size	n/a
+timeseries	out.site_energy.net.energy_consumption	float	kWh	Total site energy consumption minus on-site energy production	n/a
+timeseries	out.site_energy.net.energy_consumption_intensity	float	kWh/sqft	Total site energy consumption minus on-site energy production relative to dwelling unit size	n/a
+timeseries	out.site_energy.total.energy_consumption	float	kWh	Site total energy consumed	n/a
+timeseries	out.site_energy.total.energy_consumption_intensity	float	kWh/sqft	Site total energy consumed relative to dwelling unit size	n/a

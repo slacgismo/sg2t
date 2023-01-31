@@ -1,11 +1,15 @@
-"""Module for TMY3 data, adapted from  GridLAB-D"""
+"""Module for TMY3 data, adapted from  GridLAB-D
+This was written for the NREL TMY3 data, which can be found at
+https://github.com/slacgismo/gridlabd-weather
+"""
+
 import os, sys
 import datetime
 
 import json
 import pandas as pd
 
-from sg2t.io.weather.base import IOBase
+from sg2t.io.base import IOBase
 from sg2t.config import load_config
 from sg2t.io.schemas import weather_schema
 from sg2t.utils.saving import NpEncoder as NpEncoder
@@ -21,11 +25,7 @@ temp_dir =  os.environ["SG2T_CACHE"]
 
 
 class TMY3(IOBase):
-    """TMY3 weather data file type implementation for basic i/o.
-
-    This was written for the NREL TMY3 data, which can be found at
-    https://github.com/slacgismo/gridlabd-weather
-    """
+    """TMY3 weather data file type implementation for basic i/o."""
     def __init__(self,
                  config_name="config.ini",
                  config_key="data.tmy3",
@@ -112,8 +112,8 @@ class TMY3(IOBase):
 
         # Returned data has to be a pd.DataFrame
         # This is the data as-is from the tmy3 files
-        # Switch to standard format
-        self.format_data()
+        # Convert to standard format
+        self._format_data()
 
         # Add to metadata.json
         self.metadata["columns"] = self.keys_map
@@ -131,7 +131,7 @@ class TMY3(IOBase):
 
         return self.data
 
-    def format_data(self):
+    def _format_data(self):
         """Changes the format of the loaded tmy3 data self.data to follow
         a standard format with standard column names. See `mapping.py`.
 
@@ -149,12 +149,11 @@ class TMY3(IOBase):
             data[key] = raw_data[self.keys_map[key]]
 
         self.data = data
-        self.data['Date'] = pd.to_datetime(self.data['Date'])
-        self.data.set_index(['Date'])
+        self.data["Date"] = pd.to_datetime(self.data["Date"])
+        self.data.set_index(["Date"])
 
     def export_data(self,
                     columns=None,
-                    save_to_file=True,
                     type="CSV",
                     filename=None):
         """Export data from pd.Daframe into a CSV file or into
@@ -167,9 +166,6 @@ class TMY3(IOBase):
         columns : list of str
             List of columns to save/export from DataFrame.
 
-        save_to_file : bool
-            Whether to save to file. If false, it will only return the formatted DF.
-
         type : str
             Type of file to save data as. Currently only supports CSV.
 
@@ -178,17 +174,13 @@ class TMY3(IOBase):
 
         RETURNS
         -------
-        out : pd.DataFrame and json metadata filename
-            DataFrame of data if it exists.
+        out : str
+            Out filename and json metadata filename.
         """
         # need to update to formatted data
-        if save_to_file:
-            filename = f"tmy3_{self.state.lower()}_{self.station_name.replace(' ', '_').lower()}"
+        filename = f"tmy3_{self.state.lower()}_{self.station_name.replace(' ', '_').lower()}"
 
-        self.export(columns=columns, save_to_file=save_to_file, filename=filename)
-
-        # pass df
-        return self.data
+        return self.export(columns=columns, filename=filename)
 
     def _units(self, key):
         """Method to get the unit corresponding to column
