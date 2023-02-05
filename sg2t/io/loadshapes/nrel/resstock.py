@@ -15,7 +15,7 @@ from sg2t.io.base import IOBase
 from sg2t.config import load_config
 from sg2t.io.schemas import loadshape_schema
 from sg2t.utils.saving import NpEncoder as NpEncoder
-from sg2t.io.loadshapes.nrel_resstock.mapping import get_map
+from sg2t.io.loadshapes.nrel.mapping import get_map
 
 package_dir = os.environ["SG2T_HOME"]
 # Package cache

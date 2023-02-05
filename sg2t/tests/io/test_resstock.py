@@ -1,7 +1,7 @@
-"""Test module for the io.loadshapes.nrel_resstock.ResStock class"""
+"""Test module for the io.loadshapes.nrel.ResStock class"""
 import unittest
 import os
-from sg2t.io.loadshapes.nrel_resstock.loadshape import ResStock
+from sg2t.io.loadshapes.nrel.resstock import ResStock
 
 # TODO: remove dependencies on other methods
 package_dir = os.environ["SG2T_HOME"]
@@ -11,16 +11,16 @@ test_dir =  os.path.abspath(__file__ + "/../") + "/data"
 class TestResStock(unittest.TestCase):
 
     def test_load_weather_location(self):
-        files_dir = f"{package_dir}/io/loadshapes/nrel_resstock/"
+        files_dir = f"{package_dir}/io/loadshapes/nrel/"
 
         rs  = ResStock(
-            metadata_file=files_dir+"nrel_resstock.json"
+            metadata_file=files_dir+"resstock.json"
         )
         self.assertEqual(
             rs.load_weather_location(), "None")
 
     def test_get_data(self):
-        files_dir = f"{package_dir}/io/loadshapes/nrel_resstock/"
+        files_dir = f"{package_dir}/io/loadshapes/nrel/"
         test_data = f"{test_dir}/resstock_tmy3_loads/AL_bldg_100066-0.parquet"
 
         len_data = 35040
@@ -28,7 +28,7 @@ class TestResStock(unittest.TestCase):
         len_cols = 12 # defined in _format_data() method
 
         rs  = ResStock(
-            metadata_file=files_dir+"nrel_resstock.json"
+            metadata_file=files_dir+"resstock.json"
         )
         data = rs.get_data(test_data)
 
@@ -40,7 +40,7 @@ class TestResStock(unittest.TestCase):
         pass
 
     def test_export_data(self):
-        files_dir = f"{package_dir}/io/loadshapes/nrel_resstock/"
+        files_dir = f"{package_dir}/io/loadshapes/nrel/"
         test_data = f"{test_dir}/resstock_tmy3_loads/AL_bldg_100066-0.parquet"
 
         len_data = 35040
@@ -48,7 +48,7 @@ class TestResStock(unittest.TestCase):
         len_cols = 12  # defined in _format_data() method
 
         rs = ResStock(
-            metadata_file=files_dir + "nrel_resstock.json"
+            metadata_file=files_dir + "resstock.json"
         )
         data = rs.get_data(test_data)
         files = rs.export_data(type="CSV")

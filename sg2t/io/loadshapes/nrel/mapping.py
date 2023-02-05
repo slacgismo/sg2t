@@ -26,7 +26,7 @@ from sg2t.utils.io import load_metadata
 
 # Paths to metadata
 package_dir =  os.environ["SG2T_HOME"]
-# metadata_file = f"{package_dir}/io/loadshapes/nrel_resstock/" + "nrel_resstock.json"
+# metadata_file = f"{package_dir}/io/loadshapes/nrel/" + "resstock.json"
 
 def get_map(metadata_file):
     # Raw columns from tmy3 data
