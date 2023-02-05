@@ -14,7 +14,7 @@ class TestResStock(unittest.TestCase):
         files_dir = f"{package_dir}/io/loadshapes/nrel_resstock/"
 
         rs  = ResStock(
-            metadata_file=files_dir+"resstock_nrel.json"
+            metadata_file=files_dir+"nrel_resstock.json"
         )
         self.assertEqual(
             rs.load_weather_location(), "None")
@@ -28,7 +28,7 @@ class TestResStock(unittest.TestCase):
         len_cols = 12 # defined in _format_data() method
 
         rs  = ResStock(
-            metadata_file=files_dir+"resstock_nrel.json"
+            metadata_file=files_dir+"nrel_resstock.json"
         )
         data = rs.get_data(test_data)
 
@@ -48,7 +48,7 @@ class TestResStock(unittest.TestCase):
         len_cols = 12  # defined in _format_data() method
 
         rs = ResStock(
-            metadata_file=files_dir + "resstock_nrel.json"
+            metadata_file=files_dir + "nrel_resstock.json"
         )
         data = rs.get_data(test_data)
         files = rs.export_data(type="CSV")

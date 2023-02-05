@@ -97,7 +97,7 @@ class ResStock(IOBase):
         This only reorders the columns, putting required ones first, and others
         next, and removes redundant/unused columns.
         """
-        self.keys_map = get_map()
+        self.keys_map = get_map(self.metadata_file)
         # Save original dataframe
         raw_data = self.data
         # Create new dataframe
