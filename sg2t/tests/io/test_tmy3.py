@@ -5,7 +5,7 @@ from sg2t.io.weather.tmy3 import TMY3
 # TODO: remove dependencies on other methods
 package_dir = os.environ["SG2T_HOME"]
 # TMY3 test data
-test_dir =  os.path.abspath(__file__ + "/../") + "/data/"
+test_dir =  os.path.abspath(__file__ + "/../") + "/data/tmy3/US/"
 
 class TestTMY3(unittest.TestCase):
 
