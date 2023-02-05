@@ -1,6 +1,6 @@
 # Data files 
-sg2t/weather/data/*
-sg2t/data/temp/
+sg2t/tests/io/data/tmy3/US/*
+examples/dev/
 examples/data/*
 *.DS_Store
 **/.DS_Store
