@@ -1,7 +1,7 @@
 """Test module for the io.loadshapes.nrel.ResStock class"""
 import unittest
 import os
-from sg2t.io.loadshapes.nrel.resstock import ResStock
+from sg2t.io.loadshapes.nrel import ResStock
 
 # TODO: remove dependencies on other methods
 package_dir = os.environ["SG2T_HOME"]

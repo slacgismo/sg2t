@@ -1,7 +1,6 @@
-"""Module for ResStock Building data.
-Data can be found at https://resstock.nrel.gov/datasets
-and imported as parquet files.
-TODO: add import options through API.
+"""Module for TMY3 data corresponding to NREL's
+ ResStock and ComStock databases.
+ Source: https://resstock.nrel.gov/datasets
 """
 
 import os, sys
@@ -9,28 +8,30 @@ import datetime
 
 import json
 import pandas as pd
-import pyarrow.parquet as pq
 
 from sg2t.io.base import IOBase
 from sg2t.config import load_config
-from sg2t.io.schemas import loadshape_schema
+from sg2t.io.schemas import weather_schema
 from sg2t.utils.saving import NpEncoder as NpEncoder
-from sg2t.io.loadshapes.nrel.mapping import get_map
+from sg2t.io.weather.tmy3.mapping import get_map
+
 
 package_dir = os.environ["SG2T_HOME"]
+# TMY3 data cache
+# Note this is only available locally
+cache_dir = f"{package_dir}/weather/data/tmy3/nrel_stock/"
 # Package cache
 temp_dir =  os.environ["SG2T_CACHE"]
 
-class ResStock(IOBase):
-    """Class for importing data from NREL's ResStock
-     dataset into sg2t tools.
-    """
+
+class TMY3Stock(IOBase):
+    """TMY3 weather data file type implementation for basic i/o."""
     def __init__(self,
                  config_name="config.ini",
-                 config_key="data.resstock",
-                 metadata_file=None,
+                 config_key="data.tmy3", # TODO: update/remove
+                 metadata_file=package_dir+"/io/weather/tmy3/"+"tmy3_nrel_stock.json",
                  ):
-        """ ResStock object initialization.
+        """ TMY3 object initialization.
 
         Parameters
         ----------
@@ -46,25 +47,14 @@ class ResStock(IOBase):
              type of data.
         """
         super().__init__(config_name, config_key, metadata_file)
-        self.weather_gisjoint = self.load_weather_location()
-
-    def load_weather_location(self):
-        # TODO: check that metadata exists
-        if not self.metadata:
-            return "None"
-        try:
-            gisj_metadata = self.metadata["file"]["GISJOINT ID"]
-            return gisj_metadata
-        except KeyError:
-            return "None"
 
     def get_data(self, filename):
-        """Import raw ResStock data in DataFrame format.
+        """Get raw TMY3 data in DataFrame format.
 
         PARAMETERS
         ----------
         filename : str
-            Filename, as "ST_bldg_000000-0.parquet".
+            Filename, as "STATE-weather_station_name.tmy3".
 
         RETURNS
         -------
@@ -81,13 +71,28 @@ class ResStock(IOBase):
         # Add source filename to metadata
         self.metadata["file"]["filename"] = self.data_filename
 
-        # Read in raw data
-        self.data = pq.read_pandas(filename).to_pandas()
-        self.bldg_id = self.data.index[0]
-        self.metadata["file"]["Building ID"] = self.bldg_id
+        # Data loaded into pandas df
+        self.data = pd.read_csv(self.data_filename)
 
+        # Returned data has to be a pd.DataFrame
+        # This is the data as-is from the tmy3 files
         # Convert to standard format
         self._format_data()
+
+        # Add to metadata.json
+        self.metadata["columns"] = self.keys_map
+
+        cols_list = list(self.keys_map.keys())
+        units_list = [self._units(key) for key in cols_list]
+        iterable = zip(cols_list, units_list)
+        self.metadata["col_units"] = {key: value for (key, value) in iterable}
+
+        # Rename file for now to avoid data loss
+        # TODO: log saved json, or make saving optional
+        new_name = self.metadata_file[:-5] + "_sg2t_io.json"
+        outfile = open(new_name, "w")
+        json.dump(self.metadata, outfile, cls=NpEncoder)
+        outfile.close()
 
         return self.data
 
@@ -98,7 +103,7 @@ class ResStock(IOBase):
         This only reorders the columns, putting required ones first, and others
         next, and removes redundant/unused columns.
         """
-        self.keys_map = get_map(self.metadata_file)
+        self.keys_map = get_map(stock=True)
         # Save original dataframe
         raw_data = self.data
         # Create new dataframe
@@ -109,19 +114,18 @@ class ResStock(IOBase):
             data[key] = raw_data[self.keys_map[key]]
 
         self.data = data
-        self.data.insert(0, "Date", pd.to_datetime(self.data["Datetime"]).dt.date)
-        self.data.insert(1, "Time", pd.to_datetime(self.data["Datetime"]).dt.time)
-        self.data = self.data.drop(columns=["Datetime"])
+        self.data["Date"] = pd.to_datetime(self.data["Date"])
+        self.data.set_index(["Date"])
 
     def export_data(self,
-                columns=None,
-                save_to_file=True,
-                type="CSV",
-                filename=None):
+                    columns=None,
+                    type="CSV",
+                    filename=None):
         """Export data from pd.Daframe into a CSV file or into
         sg2t formatted DataFrame to pass onto sg2t opps.
         If saving to file, the file will be saved in the cache which
         can be accessed through os.environ["SG2T_CACHE"].
+
         PARAMETERS
         ----------
         columns : list of str
@@ -138,12 +142,31 @@ class ResStock(IOBase):
         out : str
             Out filename and json metadata filename.
         """
-        filename = f"resstock"
+        # need to update to formatted data
+        filename = f"tmy3_{self.state.lower()}_{self.station_name.replace(' ', '_').lower()}"
 
         return self._export(columns=columns, filename=filename)
 
+    def _units(self, key):
+        """Method to get the unit corresponding to column
+        from old mapping.
+
+        PARAMETERS
+        ----------
+        key : str
+            Column name.
+
+        RETURNS
+        -------
+        unit : str
+            String of unit.
+        """
+        data_key = self.keys_map[key]
+        return self.metadata["col_units"][data_key]
+
     def units(self, key):
-        """Method to get the unit corresponding to column key values.
+        """Method to get the unit corresponding to column
+        from new mapping.
 
         PARAMETERS
         ----------
@@ -156,3 +179,4 @@ class ResStock(IOBase):
             String of unit.
         """
         return self.metadata["col_units"][key]
+

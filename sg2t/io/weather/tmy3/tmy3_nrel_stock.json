@@ -1,0 +1,35 @@
+{"file": {
+   "source": "https://resstock.nrel.gov/datasets",
+    "format": "tmy3"
+},
+  "columns": {
+    "date_time" : "Datetime",
+    "Bulb Temperature [°C]" : "Dry-bulb Temperature",
+    "Relative Humidity [%]" : "Relative Humidity",
+    "Wind Speed [m/s]" : "Wind Speed",
+    "Wind Direction [Deg]" : "Wind Direction",
+    "Global Horizontal Radiation [W/m2]" : "Global Horizontal Radiation",
+    "Direct Normal Radiation [W/m2]" : "Direct Normal Radiation",
+    "Diffuse Horizontal Radiation [W/m2]" : "Diffuse Horizontal Radiation"
+  },
+  "col_units": {
+    "date_time" : "None",
+    "Bulb Temperature [°C]" : "degrees C",
+    "Relative Humidity [%]" : "%",
+    "Wind Speed [m/s]" : "m/s",
+    "Wind Direction [Deg]" : "degrees",
+    "Global Horizontal Radiation [W/m2]" : "W/m2",
+    "Direct Normal Radiation [W/m2]" : "W/m2",
+    "Diffuse Horizontal Radiation [W/m2]" : "W/m2"
+  },
+  "col_types": {
+    "date_time" : "timestamp",
+    "Bulb Temperature [°C]" : "float",
+    "Relative Humidity [%]" : "float",
+    "Wind Speed [m/s]" : "m/s",
+    "Wind Direction [Deg]" : "degrees",
+    "Global Horizontal Radiation [W/m2]" : "W/m2",
+    "Direct Normal Radiation [W/m2]" : "W/m2",
+    "Diffuse Horizontal Radiation [W/m2]" : "W/m2"
+  }
+}

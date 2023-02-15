@@ -149,8 +149,10 @@ class TMY3(IOBase):
             data[key] = raw_data[self.keys_map[key]]
 
         self.data = data
-        self.data["Date"] = pd.to_datetime(self.data["Date"])
-        self.data.set_index(["Date"])
+        self.data = self.merge_date_time(self.data, "Date", "Time")
+        self.data["Datetime"] = self.make_datetime(self.data["Datetime"])
+        self.data.sort_values("Datetime", inplace=True, ascending=True)
+        self.data.set_index("Datetime", inplace=True, drop=True)
 
     def export_data(self,
                     columns=None,
@@ -180,7 +182,7 @@ class TMY3(IOBase):
         # need to update to formatted data
         filename = f"tmy3_{self.state.lower()}_{self.station_name.replace(' ', '_').lower()}"
 
-        return self.export(columns=columns, filename=filename)
+        return self._export(columns=columns, filename=filename)
 
     def _units(self, key):
         """Method to get the unit corresponding to column

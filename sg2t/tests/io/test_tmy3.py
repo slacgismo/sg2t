@@ -24,7 +24,7 @@ class TestTMY3(unittest.TestCase):
         config_dir = f"{package_dir}/config/"
 
         station_file = test_dir + "AK-Adak_Nas.tmy3"
-        first_temp = 0.2
+        first_temp = -0.6 # val before sorting: 0.2
         len_data = 8760 # nrows
 
         tmy3 = TMY3(

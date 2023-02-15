@@ -7,11 +7,12 @@ import json
 import pandas as pd
 
 from sg2t.config import load_config
+from sg2t.utils import Timeseries
 from sg2t.utils.saving import NpEncoder as NpEncoder
 from sg2t.utils.io import load_metadata
 
 
-class IOBase:
+class IOBase(Timeseries):
     """I/O base class for defining data structures/sources.
     At initialization:
         - config_name, str, path to config file, if any
@@ -113,10 +114,10 @@ class IOBase:
 
         return self.data
 
-    def export(self,
-               columns=None,
-               type="CSV",
-               filename=None):
+    def _export(self,
+                columns=None,
+                type="CSV",
+                filename=None):
         """Export data from pd.Daframe into a CSV file or into
         sg2t formatted DataFrame to pass onto sg2t opps.
         If saving to file, the file will be saved in the cache which
