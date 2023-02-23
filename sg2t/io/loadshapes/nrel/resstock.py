@@ -89,6 +89,15 @@ class ResStock(IOBase):
         # Convert to standard format
         self._format_data()
 
+        # Add to metadata.json
+        self.metadata["columns"] = self.keys_map
+
+        # update col_units in metadata to use new keys
+        cols_list = list(self.keys_map.keys())
+        units_list = [self._units(key) for key in cols_list]
+        iterable = zip(cols_list, units_list)
+        self.metadata["col_units"] = {key: value for (key, value) in iterable}
+
         return self.data
 
     def _format_data(self):
@@ -109,9 +118,9 @@ class ResStock(IOBase):
             data[key] = raw_data[self.keys_map[key]]
 
         self.data = data
-        self.data.insert(0, "Date", pd.to_datetime(self.data["Datetime"]).dt.date)
-        self.data.insert(1, "Time", pd.to_datetime(self.data["Datetime"]).dt.time)
-        self.data = self.data.drop(columns=["Datetime"])
+        self.data["Datetime"] = self.make_datetime(self.data["Datetime"])
+        self.data.sort_values("Datetime", inplace=True, ascending=True)
+        self.data.set_index("Datetime", inplace=True, drop=True)
 
     def export_data(self,
                 columns=None,
@@ -142,8 +151,26 @@ class ResStock(IOBase):
 
         return self._export(columns=columns, filename=filename)
 
+    def _units(self, key):
+        """Method to get the unit corresponding to column
+        from old mapping.
+
+        PARAMETERS
+        ----------
+        key : str
+            Column name.
+
+        RETURNS
+        -------
+        unit : str
+            String of unit.
+        """
+        data_key = self.keys_map[key]
+        return self.metadata["col_units"][data_key]
+
     def units(self, key):
-        """Method to get the unit corresponding to column key values.
+        """Method to get the unit corresponding to column
+        from new mapping.
 
         PARAMETERS
         ----------

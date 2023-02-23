@@ -4,7 +4,7 @@
 },
   "columns": {
     "date_time" : "Datetime",
-    "Bulb Temperature [°C]" : "Dry-bulb Temperature",
+    "Dry Bulb Temperature [°C]" : "Dry-bulb Temperature",
     "Relative Humidity [%]" : "Relative Humidity",
     "Wind Speed [m/s]" : "Wind Speed",
     "Wind Direction [Deg]" : "Wind Direction",
@@ -14,7 +14,7 @@
   },
   "col_units": {
     "date_time" : "None",
-    "Bulb Temperature [°C]" : "degrees C",
+    "Dry Bulb Temperature [°C]" : "degrees C",
     "Relative Humidity [%]" : "%",
     "Wind Speed [m/s]" : "m/s",
     "Wind Direction [Deg]" : "degrees",
@@ -24,7 +24,7 @@
   },
   "col_types": {
     "date_time" : "timestamp",
-    "Bulb Temperature [°C]" : "float",
+    "Dry Bulb Temperature [°C]" : "float",
     "Relative Humidity [%]" : "float",
     "Wind Speed [m/s]" : "m/s",
     "Wind Direction [Deg]" : "degrees",

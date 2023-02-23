@@ -18,11 +18,14 @@ from sg2t.utils.io import load_metadata
 
 # Paths to metadata
 package_dir =  os.environ["SG2T_HOME"]
-metadata_file = f"{package_dir}/io/weather/tmy3/" + "tmy3_nrel.json"
+metadata_path = f"{package_dir}/io/weather/tmy3/"
 
 def get_map(stock=False):
     # Raw columns from tmy3 data
-    md = load_metadata(metadata_file)
+    if not stock:
+        md = load_metadata(metadata_path + "tmy3_nrel.json")
+    else:
+        md = load_metadata(metadata_path + "tmy3_nrel_stock.json")
     tmy3_cols = md["columns"]
 
     if stock: # if using ResStock or ComStock TMY3, use all cols

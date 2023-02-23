@@ -48,7 +48,7 @@ class TMY3Stock(IOBase):
         """
         super().__init__(config_name, config_key, metadata_file)
 
-    def get_data(self, filename):
+    def get_data(self, filename, save_json=False):
         """Get raw TMY3 data in DataFrame format.
 
         PARAMETERS
@@ -80,8 +80,9 @@ class TMY3Stock(IOBase):
         self._format_data()
 
         # Add to metadata.json
-        self.metadata["columns"] = self.keys_map
+        #self.metadata["columns"] = self.keys_map
 
+        # update col_units in metadata to use new keys
         cols_list = list(self.keys_map.keys())
         units_list = [self._units(key) for key in cols_list]
         iterable = zip(cols_list, units_list)
@@ -89,10 +90,11 @@ class TMY3Stock(IOBase):
 
         # Rename file for now to avoid data loss
         # TODO: log saved json, or make saving optional
-        new_name = self.metadata_file[:-5] + "_sg2t_io.json"
-        outfile = open(new_name, "w")
-        json.dump(self.metadata, outfile, cls=NpEncoder)
-        outfile.close()
+        if save_json:
+            new_name = self.metadata_file[:-5] + "_sg2t_io.json"
+            outfile = open(new_name, "w")
+            json.dump(self.metadata, outfile, cls=NpEncoder)
+            outfile.close()
 
         return self.data
 
@@ -114,8 +116,9 @@ class TMY3Stock(IOBase):
             data[key] = raw_data[self.keys_map[key]]
 
         self.data = data
-        self.data["Date"] = pd.to_datetime(self.data["Date"])
-        self.data.set_index(["Date"])
+        self.data["Datetime"] = self.make_datetime(self.data["Datetime"])
+        self.data.sort_values("Datetime", inplace=True, ascending=True)
+        self.data.set_index("Datetime", inplace=True, drop=True)
 
     def export_data(self,
                     columns=None,

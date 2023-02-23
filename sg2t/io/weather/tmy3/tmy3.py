@@ -68,7 +68,7 @@ class TMY3(IOBase):
 
         return sorted(indices.strip().split("\n"))
 
-    def get_data(self, filename):
+    def get_data(self, filename, save_json=False):
         """Get raw TMY3 data in DataFrame format.
 
         PARAMETERS
@@ -124,10 +124,11 @@ class TMY3(IOBase):
         self.metadata["col_units"] = {key: value for (key, value) in iterable}
 
         # Rename file for now to avoid data loss
-        new_name = self.metadata_file[:-5] + "_sg2t_io.json"
-        outfile = open(new_name, "w")
-        json.dump(self.metadata, outfile, cls=NpEncoder)
-        outfile.close()
+        if save_json:
+            new_name = self.metadata_file[:-5] + "_sg2t_io.json"
+            outfile = open(new_name, "w")
+            json.dump(self.metadata, outfile, cls=NpEncoder)
+            outfile.close()
 
         return self.data
 
