@@ -189,12 +189,15 @@ class Weather:
                   "To convert, use Weather.c_to_f method.")
 
         # Calculate HI
-        hi_array = np.vectorize(self.heat_index)(temp, rh)
+        hi_array_f = np.vectorize(self.heat_index)(temp, rh)
+        hi_array_c = self.f_to_c(hi_array_f)
+
         # Add to df and metadata and return series
-        self.data["Heat Index"] = hi_array
+        # Store in CELCIUS
+        self.data["Heat Index"] = hi_array_c
         if self.metadata:
             self.metadata["columns"]["Heat Index"] = "heat index"
-            self.metadata["col_units"]["Heat Index"] = "degrees F"
+            self.metadata["col_units"]["Heat Index"] = "degrees C"
             self.metadata["col_types"]["Heat Index"] = "float"
 
         return self.data["Heat Index"]
@@ -263,4 +266,20 @@ class Weather:
             Temperature in degrees F.
         """
         return (temp * 9 / 5) + 32
+
+    @staticmethod
+    def f_to_c(temp):
+        """Degrees F to C conversion.
+
+        Parameters
+        ----------
+        temp : float or array
+            Temperature in degrees F.
+
+        Returns
+        -------
+        out : float or array
+            Temperature in degrees C.
+        """
+        return (temp - 32) * 5 / 9
 

@@ -17,18 +17,16 @@ from sg2t.io.weather.tmy3.mapping import get_map
 
 
 package_dir = os.environ["SG2T_HOME"]
-# TMY3 data cache
 # Note this is only available locally
-cache_dir = f"{package_dir}/weather/data/tmy3/US/"
 # Package cache
-temp_dir =  os.environ["SG2T_CACHE"]
+cache_dir =  os.environ["SG2T_CACHE"]
 
 
 class TMY3(IOBase):
     """TMY3 weather data file type implementation for basic i/o."""
     def __init__(self,
                  config_name="config.ini",
-                 config_key="data.tmy3",
+                 config_key="io.tmy3",
                  metadata_file=package_dir+"/io/weather/tmy3/"+"tmy3_nrel.json",
                  ):
         """ TMY3 object initialization.
@@ -58,10 +56,13 @@ class TMY3(IOBase):
             "STATE-weather_station_name.tmy3" sorted alphabetically.
         """
         index_filename = self.metadata["file"]["index_filename"]
-        cache_file = f"{data_dir}{index_filename}"
+        cache_file = f"{data_dir}/{index_filename}"
 
         if os.path.exists(cache_file):
             with open(cache_file, "rt") as f:
+                indices = f.read()
+        elif os.path.exists(package_dir + "/tests/io/data/tmy3/US/.index"):
+            with open(package_dir + "/tests/io/data/tmy3/US/.index", "rt") as f:
                 indices = f.read()
         else:
             raise FileNotFoundError(f"No index file provided.")
@@ -124,6 +125,7 @@ class TMY3(IOBase):
         self.metadata["col_units"] = {key: value for (key, value) in iterable}
 
         # Rename file for now to avoid data loss
+        # TODO: save to cache
         if save_json:
             new_name = self.metadata_file[:-5] + "_sg2t_io.json"
             outfile = open(new_name, "w")

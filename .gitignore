@@ -1,4 +1,6 @@
-# Data files 
+# Data files
+examples/dev/credentials.json
+*/credentials.json
 sg2t/tests/io/data/tmy3/US/*
 examples/dev/
 examples/data/*

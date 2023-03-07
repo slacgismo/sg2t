@@ -13,8 +13,6 @@ class TestTMY3(unittest.TestCase):
         files_dir = f"{package_dir}/io/weather/tmy3/"
 
         tmy3  = TMY3(
-            config_name="config.ini",
-            config_key="data.tmy3",
             metadata_file=files_dir+"tmy3_nrel.json"
         )
         self.assertEqual(tmy3.get_index(test_dir)[0], "AK-Adak_Nas.tmy3")
@@ -28,8 +26,6 @@ class TestTMY3(unittest.TestCase):
         len_data = 8760 # nrows
 
         tmy3 = TMY3(
-            config_name="config.ini",
-            config_key="data.tmy3",
             metadata_file=files_dir+"tmy3_nrel.json"
         )
         data = tmy3.get_data(station_file)
