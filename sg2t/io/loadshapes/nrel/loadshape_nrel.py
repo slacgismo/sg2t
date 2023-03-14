@@ -34,8 +34,13 @@ class LoadShapeAggregation:
 
     Example
     -------
+<<<<<<< Updated upstream
     >>> Loadshape = Loadshape(aggregation, timescale)
     >>> df = Loadshape.loadshape_by_state_resstock(state = "CA", ...)
+=======
+    >>> Loadshape_module = LoadShapeAggregation()
+    >>> df = Loadshape_module.loadshape_by_state_resstock(state = "CA", home_type = "mobile_home")
+>>>>>>> Stashed changes
     >>> print(df)
                 Electricity Cooling  Electricity Heating  Fuel Oil Heating  ...  Fuel Oil Total  Natural Gas Total  Propane Total
         0          31338.122088        114279.874287     154976.407965  ...   166299.458831      577459.138057  203219.075954
@@ -58,7 +63,11 @@ class LoadShapeAggregation:
         Parameters
         ----------
         aggregation: str 
+<<<<<<< Updated upstream
             default is set as 'avg', takes the average values for each timestep in the day
+=======
+            default is set as 'avg' which takes the average values for each timestep in the day
+>>>>>>> Stashed changes
             other options: 
                 'sum': take the sum across the timeperiod for each timestep in the day
                 'peak_day': filters the peak_day loadshape
@@ -66,7 +75,11 @@ class LoadShapeAggregation:
         month_start, month_end : int
             month range for aggregation, default is set to aggregate for the whole year (month_start = 1, month_end = 12)
             for example: 
+<<<<<<< Updated upstream
                 if aggregation is wanted for a specific month e.g. January; month_start = 1, month_end = 2 
+=======
+                if aggregation is wanted for a specific month e.g. January; month_start = 1, month_end = 2
+>>>>>>> Stashed changes
                 if aggregation is wanted for a season e.g. Summer (June, July, August); month_start = 6, month_end = 9 
 
         """         
@@ -129,9 +142,14 @@ class LoadShapeAggregation:
         """plot the loadshape"""
         t = np.linspace(0,24,len(df))
         plt.plot(t, df["Electricity Total"])
+<<<<<<< Updated upstream
         # plt.title('Daily Consumption for ' + str(building) + ' (month =' + str(month) + ')')
         plt.xlabel('Hour of the day')
         plt.ylabel('Electric Consumption (kWh)')
         plt.legend()
+=======
+        plt.xlabel('Hour of the day')
+        plt.ylabel('Electric Consumption (kWh)')
+>>>>>>> Stashed changes
         plt.grid()
         plt.show()
