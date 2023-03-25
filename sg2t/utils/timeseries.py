@@ -41,6 +41,49 @@ class Timeseries():
                 series[i] = date
         return series
 
+    def timeseries_aggregate(self, df, aggregation = 'avg', month_start = 1, month_end = 12):
+        """ 
+        Takes timeseries data for a year then perform aggregation and returns a aggregated dataframe for 24hrs. 
+
+        Parameters
+        ----------
+        df: pd.DataFrame
+            dataframe where index is datatime type that includes data for a whole year
+
+        aggregation: str 
+            default is set as 'avg' which takes the average values for each timestep in the day
+            other options: 
+                'sum': take the sum across the timeperiod for each timestep in the day
+                'peak_day': filters the peak_day loadshape
+
+        month_start, month_end : int
+            month range for aggregation, default is set to aggregate for the whole year (month_start = 1, month_end = 12)
+            for example: 
+                Aggregation for a specific month e.g. January; month_start = 1, month_end = 2
+                Aggregation for a season e.g. Summer (June, July, August); month_start = 6, month_end = 9 
+        """   
+        # check to make sure dataframe passed is in the correct form
+        if not isinstance(df.index, pd.DatetimeIndex):
+            raise NotImplementedError("Dataframe index is not pd.DatetimeIndex type; convert index to datetime formate before passing dataframe") 
+
+        # filter data by month (could be for a specific month or for a range of months)
+        df_month = df[df.index.month.isin([i for i in range(month_start, month_end)])]
+
+        # aggregate data using groupby with the corrosponding aggregation type
+        if aggregation == 'avg':
+            df_aggregated = df_month.groupby([(df_month.index.hour),(df_month.index.minute)]).mean()
+        elif aggregation == 'sum':
+            df_aggregated = df_month.groupby([(df_month.index.hour),(df_month.index.minute)]).sum()
+        elif aggregation == 'peak_day':
+            # find peak load day based on "Electricity Total" column
+            peak_day = df[df["Electricity Total"] == df["Electricity Total"].max()].index[0]
+            df_aggregated = df[(df.index.day == peak_day.day) & (df.index.month == peak_day.month)]
+        else:
+            raise ValueError('Error: Aggregation input is not right; have to use one of the following: "avg", "sum", "peakday" ')  
+
+        df_aggregated = df_aggregated.reset_index(drop=True)
+        return df_aggregated
+
     # adjust below
     def get_daytype(self, value):
         """Default grouping function:
