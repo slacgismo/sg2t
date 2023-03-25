@@ -41,7 +41,47 @@ class Timeseries():
                 series[i] = date
         return series
 
-    def timeseries_aggregate(self, df, aggregation = 'avg', month_start = 1, month_end = 12):
+    # adjust below
+    def get_daytype(self, value):
+        """Default grouping function:
+        Get the day type for a datetime value
+        """
+        for daytype, weekdays in daytypes.items():
+            if value.weekday() in weekdays:
+                return daytype
+        return None
+
+    def get_hour(self, x, dstrules):
+        """Default grouping function:
+        Get the hour of day for a datetime value
+        """
+        if x.year in dstrules:
+            rule = dstrules[x.year]
+            if x > rule[0] and x <= rule[1]:
+                return x.hour + 1
+        return x.hour
+
+    def group_data(self):
+        self.datecol = self.data.columns[0]
+        self.daytypes = {
+            "weekday" : [0,1,2,3,4],
+            "weekend" : [5,6],
+            "holiday" : [7],
+            }
+        self.dstrules = {}
+        self.groupby = {
+            "daytype":[self.datecol,get_daytype,self.daytypes],
+            "hour":[self.datecol,get_hour,self.dstrules]
+            }
+        self.columns = self.data.columns[1:]
+        self.add_groups()
+        if not_valid:
+            return Exception
+
+        valid = True
+        return valid
+
+def timeseries_aggregate(df, aggregation = 'avg', month_start = 1, month_end = 12):
         """ 
         Takes timeseries data for a year then perform aggregation and returns a aggregated dataframe for 24hrs. 
 
@@ -83,43 +123,3 @@ class Timeseries():
 
         df_aggregated = df_aggregated.reset_index(drop=True)
         return df_aggregated
-
-    # adjust below
-    def get_daytype(self, value):
-        """Default grouping function:
-        Get the day type for a datetime value
-        """
-        for daytype, weekdays in daytypes.items():
-            if value.weekday() in weekdays:
-                return daytype
-        return None
-
-    def get_hour(self, x, dstrules):
-        """Default grouping function:
-        Get the hour of day for a datetime value
-        """
-        if x.year in dstrules:
-            rule = dstrules[x.year]
-            if x > rule[0] and x <= rule[1]:
-                return x.hour + 1
-        return x.hour
-
-    def group_data(self):
-        self.datecol = self.data.columns[0]
-        self.daytypes = {
-            "weekday" : [0,1,2,3,4],
-            "weekend" : [5,6],
-            "holiday" : [7],
-            }
-        self.dstrules = {}
-        self.groupby = {
-            "daytype":[self.datecol,get_daytype,self.daytypes],
-            "hour":[self.datecol,get_hour,self.dstrules]
-            }
-        self.columns = self.data.columns[1:]
-        self.add_groups()
-        if not_valid:
-            return Exception
-
-        valid = True
-        return valid
