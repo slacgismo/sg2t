@@ -123,8 +123,8 @@ class API():
         """Pulls CSV"""
         climate = climate.lower()
 
-        if climate == "very-cold":
-            raise("No ComStock data by Building America Climate Zone for 'Very-Cold'.")
+        # if climate == "very-cold":
+        #     raise("No ComStock data by Building America Climate Zone for 'Very-Cold'.")
 
         # for some reason "Very Cold" climate zone naming is set up differently
         if climate == "very-cold":

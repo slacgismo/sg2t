@@ -4,4 +4,4 @@ jupyter
 matplotlib
 pyarrow
 boto3
-solar-data-tools
+# solar-data-tools
