@@ -100,14 +100,14 @@ class API():
         df.index = pd.to_datetime(df.index)
         return df
 
-    def get_data_resstock_by_climatezone_iecc(self, climate_iecc, home_type, upgrade=0):
+    def get_data_resstock_by_climatezone_iecc(self, climate, home_type, upgrade=0):
         """Pulls CSV"""
 
-        filename = f"up{upgrade:02}-{climate_iecc.lower()}-{home_type}.csv"
+        filename = f"up{upgrade:02}-{climate.lower()}-{home_type}.csv"
         timeseries_aggregate_climate = f"timeseries_aggregates/" \
                                        f"by_ashrae_iecc_climate_zone_2004/" \
                                        f"upgrade={upgrade}/" \
-                                       f"ashrae_iecc_climate_zone_2004={climate_iecc.upper()}/" \
+                                       f"ashrae_iecc_climate_zone_2004={climate.upper()}/" \
                                        f"{filename}"
 
         url =  self.paths_amy_2018_v1["end_use_loads"] +\
@@ -157,10 +157,10 @@ class API():
         df.index = pd.to_datetime(df.index)
         return df
 
-    def get_data_comstock_by_climatezone_iecc(self, climate_iecc, building_type):
+    def get_data_comstock_by_climatezone_iecc(self, climate, building_type):
         """Pulls CSV"""
         
-        filename = f"{climate_iecc.lower()}-{building_type}.csv"
+        filename = f"{climate.lower()}-{building_type}.csv"
         timeseries_aggregate_climate = f"timeseries_aggregates/" \
                                        f"by_ashrae_iecc_climate_zone_2004/" \
                                        f"{filename}"
@@ -169,7 +169,7 @@ class API():
               self.paths_amy_2018_v1["comstock"] +\
               timeseries_aggregate_climate
 
-        df = pd.read_csv(url, index_col=3)
+        df = pd.read_csv(url, index_col=2)
         df.index = pd.to_datetime(df.index)
         return df
 
