@@ -100,6 +100,24 @@ class API():
         df.index = pd.to_datetime(df.index)
         return df
 
+    def get_data_resstock_by_climatezone_iecc(self, climate, home_type, upgrade=0):
+        """Pulls CSV"""
+
+        filename = f"up{upgrade:02}-{climate.lower()}-{home_type}.csv"
+        timeseries_aggregate_climate = f"timeseries_aggregates/" \
+                                       f"by_ashrae_iecc_climate_zone_2004/" \
+                                       f"upgrade={upgrade}/" \
+                                       f"ashrae_iecc_climate_zone_2004={climate.upper()}/" \
+                                       f"{filename}"
+
+        url =  self.paths_amy_2018_v1["end_use_loads"] +\
+               self.paths_amy_2018_v1["resstock"] + \
+               timeseries_aggregate_climate
+
+        df = pd.read_csv(url, index_col=3)
+        df.index = pd.to_datetime(df.index)
+        return df
+
     def get_data_resstock_by_state(self, state, home_type, upgrade=0):
         """Pulls CSV"""
         state = state.upper()
@@ -123,9 +141,6 @@ class API():
         """Pulls CSV"""
         climate = climate.lower()
 
-        # if climate == "very-cold":
-        #     raise("No ComStock data by Building America Climate Zone for 'Very-Cold'.")
-
         # for some reason "Very Cold" climate zone naming is set up differently
         if climate == "very-cold":
             climate = "very_cold"
@@ -138,6 +153,22 @@ class API():
         url = self.paths_amy_2018_v1["end_use_loads"] +\
               self.paths_amy_2018_v1["comstock"] +\
               timeseries_aggregate_climate
+        df = pd.read_csv(url, index_col=2)
+        df.index = pd.to_datetime(df.index)
+        return df
+
+    def get_data_comstock_by_climatezone_iecc(self, climate, building_type):
+        """Pulls CSV"""
+        
+        filename = f"{climate.lower()}-{building_type}.csv"
+        timeseries_aggregate_climate = f"timeseries_aggregates/" \
+                                       f"by_ashrae_iecc_climate_zone_2004/" \
+                                       f"{filename}"
+
+        url = self.paths_amy_2018_v1["end_use_loads"] +\
+              self.paths_amy_2018_v1["comstock"] +\
+              timeseries_aggregate_climate
+
         df = pd.read_csv(url, index_col=2)
         df.index = pd.to_datetime(df.index)
         return df

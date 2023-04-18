@@ -3,6 +3,8 @@
 CLIMATE_ZONES = ("cold", "hot-dry", "hot-humid", "marine", "mixed-dry",
                                 "mixed-humid", "very-cold")
 
+CLIMATE_ZONES_IECC = ("1A", "2A", "2B", "2B", "3A", "3B", "3C", "4A", "4B", "4C", "5A", "5B", "6A", "6B", "7A", "7B") # https://basc.pnnl.gov/images/iecc-climate-zone-map
+
 BUILDING_TYPES = ("fullservicerestaurant", "quickservicerestaurant", "hospital",
                                "outpatient", "largehotel", "smallhotel", "largeoffice",
                                "mediumoffice", "smalloffice", "secondaryschool", "primaryschool",

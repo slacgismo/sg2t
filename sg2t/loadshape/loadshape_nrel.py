@@ -1,3 +1,4 @@
+from turtle import home
 from typing import Optional
 import pandas as pd
 from sg2t.io.loadshapes.nrel.api import API
@@ -95,6 +96,37 @@ class LoadshapeNrel:
             df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
         return df
 
+    def get_resstock_loadshape_by_climatezone_iecc(self, climate: str, home_type: Optional[str] = None) -> pd.DataFrame:
+        """ pulls resstock energy data by iecc climate zone and home_type and uses the aggregate function to return a 24hr loadshape dataframe
+
+        PARAMETERS
+        ----------
+        climate: str
+            iecc climate zone (1A, 2A, 2B, ...)
+            https://basc.pnnl.gov/images/iecc-climate-zone-map
+
+        home_type: str
+            home type (fullservicerestaurant, hospital, largeoffice, smalloffice, etc...)
+            if none provided, it sums up all the home types energy consumption to get a total loadshape for all the climate zone's residential sector energy consumption
+
+        RETURNS
+        -------
+        df: pd.DataFrame
+            returns a dataframe with 24hr loadshape for the climate zone residential/resstock energy consumption
+        """
+        if home_type == None:
+            # sums up all types of homes (single-family detatched, apartments, etc..)
+            df = 0 # initialization to be able to add all the dataframes together
+            for home_type in HOME_TYPES:
+                df_ = self.nrel_api.get_data_resstock_by_climatezone_iecc(climate, home_type)
+                df_ = self._format_columns_df(df_)
+                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
+        else:
+            df_ = self.nrel_api.get_data_resstock_by_climatezone_iecc(climate, home_type)
+            df_ = self._format_columns_df(df_)
+            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
+        return df
+
     def get_resstock_loadshape_total(self) -> pd.DataFrame:
         """gets the total residential/resstock loadshape for the whole US by summing up all the climate zones loadshapes for all home types"""
         total_resstock_df = 0 # initialization to be able to add all the dataframes together
@@ -160,6 +192,38 @@ class LoadshapeNrel:
                 df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
         else:
             df_ = self.nrel_api.get_data_comstock_by_climatezone(climate, building_type)
+            df_ = self._format_columns_df(df_)
+            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)  
+        return df
+
+    def get_comstock_loadshape_by_climatezone_iecc(self, climate: str, building_type: Optional[str] = None) -> pd.DataFrame:
+        """ pulls comstock energy data by iecc climate zone and building_type and uses the aggregate function to return a 24hr loadshape dataframe
+        if building_type is not provided, it sums all the building types to get a total loadshape for all the commercial sector for that climate zone
+
+        PARAMETERS
+        ----------
+        climate: str
+            iecc climate zone (1A, 2A, 2B, ...)
+            https://basc.pnnl.gov/images/iecc-climate-zone-map
+
+        building_type: str
+            home type (fullservicerestaurant, hospital, largeoffice, smalloffice, etc...)
+            if none provided, it sums up all the building types energy consumption to get a total loadshape for all the climate zone commercial sector energy consumption
+
+        RETURNS
+        -------
+        df: pd.DataFrame
+            returns a dataframe with 24hr loadshape for the climate zone commercial/comstock energy consumption
+        """
+        if building_type == None:
+            # sums up all building types (fullservicerestaurant, clinics, schools, etc..)
+            df = 0 # initialization to be able to add all the dataframes together
+            for building_type in BUILDING_TYPES:
+                df_ = self.nrel_api.get_data_comstock_by_climatezone_iecc(climate, building_type)
+                df_ = self._format_columns_df(df_)
+                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
+        else:
+            df_ = self.nrel_api.get_data_comstock_by_climatezone_iecc(climate, building_type)
             df_ = self._format_columns_df(df_)
             df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)  
         return df
