@@ -239,8 +239,3 @@ class LoadshapeNrel:
         for climate in CLIMATE_ZONES:
             total_comstock_df += self.get_comstock_loadshape_by_climatezone(climate)
         return total_comstock_df
-
-api = API()
-df = api.get_data_comstock_by_state(state='CA', building_type='warehouse')
-df = Timeseries.timeseries_aggregate(df, 'avg', 1, 2, 'weekday')
-print(df)
