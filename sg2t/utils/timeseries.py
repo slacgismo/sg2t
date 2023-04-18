@@ -42,7 +42,7 @@ class Timeseries():
         return series
 
     @staticmethod
-    def timeseries_aggregate(df, aggregation = 'avg', month_start = 1, month_end = 12):
+    def timeseries_aggregate(df, aggregation = 'avg', month_start = 1, month_end = 12, daytype = None):
         """ 
         Takes timeseries data then perform aggregation and returns a aggregated dataframe for 24hrs. 
 
@@ -62,19 +62,37 @@ class Timeseries():
             for example: 
                 Aggregation for a specific month e.g. January; month_start = 1, month_end = 2
                 Aggregation for a season e.g. Summer (June, July, August); month_start = 6, month_end = 9 
+
+         daytype: str
+            filters data based on daytype: if it's weekday (Mon-Fri) or weekend (Sat-Sun)
+            default is set to None which doesn't do any daytype filtering
+
         """   
         # check to make sure dataframe passed is in the correct form
         if not isinstance(df.index, pd.DatetimeIndex):
             raise NotImplementedError("Dataframe index is not pd.DatetimeIndex type; convert index to datetime formate before passing dataframe") 
 
+        # remove last row as df includes next year first data point (01-01 00:00:00)      
+        df = df[:-1] 
+
         # filter data by month (could be for a specific month or for a range of months)
-        df_month = df[df.index.month.isin([i for i in range(month_start, month_end)])]
+        df = df[df.index.month.isin([i for i in range(month_start, month_end)])]
+
+        # filter data by daytype
+        if daytype == 'weekday':
+            df = df[df.index.weekday <= 4]
+        elif daytype == 'weekend':
+            df = df[df.index.weekday > 4]
+        elif daytype == None:
+            df = df
+        else: 
+            raise ValueError('Error: Weekday input is not right; have to use either "weekday" or "weekend" ')
 
         # aggregate data using groupby with the corrosponding aggregation type
         if aggregation == 'avg':
-            df_aggregated = df_month.groupby([(df_month.index.hour),(df_month.index.minute)]).mean()
+            df_aggregated = df.groupby([(df.index.hour),(df.index.minute)]).mean()
         elif aggregation == 'sum':
-            df_aggregated = df_month.groupby([(df_month.index.hour),(df_month.index.minute)]).sum()
+            df_aggregated = df.groupby([(df.index.hour),(df.index.minute)]).sum()
         elif aggregation == 'peak_day':
             # find peak load day based on "Electricity Total" column
             peak_day = df[df["Electricity Total"] == df["Electricity Total"].max()].index[0]

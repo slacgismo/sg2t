@@ -8,7 +8,7 @@ from sg2t.io.loadshapes.nrel.naming import CLIMATE_ZONES, HOME_TYPES, BUILDING_T
 class LoadshapeNrel:
     """ Loadshape analysis for Resstock and Comstock energy consumption data from pulled from NREL directly using api.py"""
 
-    def __init__(self, aggregation = 'avg', month_start = 1, month_end = 12):
+    def __init__(self, aggregation = 'avg', month_start = 1, month_end = 12, daytype = None):
         """ 
         PARAMETERS
         ----------
@@ -23,12 +23,17 @@ class LoadshapeNrel:
             for example: 
                 if aggregation is wanted for a specific month e.g. January; month_start = 1, month_end = 2
                 if aggregation is wanted for a season e.g. Summer (June, July, August); month_start = 6, month_end = 9 
+        
+         daytype: str
+            filters data based on daytype: if it's weekday (Mon-Fri) or weekend (Sat-Sun)
+            default is set to None which doesn't do any daytype filtering
 
         """         
         self.nrel_api = API()
         self.aggregation = aggregation
         self.month_start = month_start
         self.month_end = month_end
+        self.daytype = daytype
 
     def _format_columns_df(self, df):
          # rename columns using NREL_COL_MAPPING and drop the rest of the columns
@@ -59,11 +64,11 @@ class LoadshapeNrel:
             for home_type in HOME_TYPES:
                 df_ = self.nrel_api.get_data_resstock_by_state(state, home_type)
                 df_ = self._format_columns_df(df_)
-                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
+                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end, self.daytype)
         else:
             df_ = self.nrel_api.get_data_resstock_by_state(state, home_type)
             df_ = self._format_columns_df(df_)
-            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
+            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end, self.daytype)
         return df
 
     def get_resstock_loadshape_by_climatezone(self, climate: str, home_type: Optional[str] = None) -> pd.DataFrame:
@@ -89,11 +94,11 @@ class LoadshapeNrel:
             for home_type in HOME_TYPES:
                 df_ = self.nrel_api.get_data_resstock_by_climatezone(climate, home_type)
                 df_ = self._format_columns_df(df_)
-                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
+                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end, self.daytype)
         else:
             df_ = self.nrel_api.get_data_resstock_by_climatezone(climate, home_type)
             df_ = self._format_columns_df(df_)
-            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
+            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end, self.daytype)
         return df
 
     def get_resstock_loadshape_by_climatezone_iecc(self, climate: str, home_type: Optional[str] = None) -> pd.DataFrame:
@@ -120,11 +125,11 @@ class LoadshapeNrel:
             for home_type in HOME_TYPES:
                 df_ = self.nrel_api.get_data_resstock_by_climatezone_iecc(climate, home_type)
                 df_ = self._format_columns_df(df_)
-                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
+                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end, self.daytype)
         else:
             df_ = self.nrel_api.get_data_resstock_by_climatezone_iecc(climate, home_type)
             df_ = self._format_columns_df(df_)
-            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
+            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end, self.daytype)
         return df
 
     def get_resstock_loadshape_total(self) -> pd.DataFrame:
@@ -158,11 +163,11 @@ class LoadshapeNrel:
             for building_type in BUILDING_TYPES:
                 df_ = self.nrel_api.get_data_comstock_by_state(state, building_type)
                 df_ = self._format_columns_df(df_)
-                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
+                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end, self.daytype)
         else:
             df_ = self.nrel_api.get_data_comstock_by_state(state, building_type)
             df_ = self._format_columns_df(df_)
-            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
+            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end, self.daytype)
         return df
 
     def get_comstock_loadshape_by_climatezone(self, climate: str, building_type: Optional[str] = None) -> pd.DataFrame:
@@ -189,11 +194,11 @@ class LoadshapeNrel:
             for building_type in BUILDING_TYPES:
                 df_ = self.nrel_api.get_data_comstock_by_climatezone(climate, building_type)
                 df_ = self._format_columns_df(df_)
-                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
+                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end, self.daytype)
         else:
             df_ = self.nrel_api.get_data_comstock_by_climatezone(climate, building_type)
             df_ = self._format_columns_df(df_)
-            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)  
+            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end, self.daytype)  
         return df
 
     def get_comstock_loadshape_by_climatezone_iecc(self, climate: str, building_type: Optional[str] = None) -> pd.DataFrame:
@@ -221,11 +226,11 @@ class LoadshapeNrel:
             for building_type in BUILDING_TYPES:
                 df_ = self.nrel_api.get_data_comstock_by_climatezone_iecc(climate, building_type)
                 df_ = self._format_columns_df(df_)
-                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)
+                df += Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end, self.daytype)
         else:
             df_ = self.nrel_api.get_data_comstock_by_climatezone_iecc(climate, building_type)
             df_ = self._format_columns_df(df_)
-            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end)  
+            df = Timeseries.timeseries_aggregate(df_, self.aggregation, self.month_start, self.month_end, self.daytype)  
         return df
 
     def get_comstock_loadshape_total(self) -> pd.DataFrame:
