@@ -1,6 +1,5 @@
 """Class for timeseries data with methods of common time axis manipulations."""
 import datetime
-from msilib.schema import Error
 import pandas as pd
 
 class Timeseries():
