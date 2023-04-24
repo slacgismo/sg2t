@@ -31,8 +31,9 @@ NREL_COL_MAPPING= {
     "out.natural_gas.heating.energy_consumption": "Natural Gas Heating",
     "out.propane.heating.energy_consumption": "Propane Heating",
     "out.site_energy.total.energy_consumption": "Site Energy Total",
+    "out.district_heating.total.energy_consumption": "District Heating Total",
+    "out.district_cooling.total.energy_consumption": "District Cooling Total",
     "out.electricity.total.energy_consumption": "Electricity Total",
-    "out.fuel_oil.total.energy_consumption": "Fuel Oil Total",
     "out.natural_gas.total.energy_consumption": "Natural Gas Total",
-    "out.propane.total.energy_consumption": "Propane Total"
+    "out.other_fuel.total.energy_consumption": "Other Fuel Total"
 }
