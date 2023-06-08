@@ -224,7 +224,7 @@ def __(
     # plt.axvline(x=X0[0], color='b', ls=':', label='Peak Adoption Year')
     plt.ylabel('New Supply (billion kWh)')
     plt.xlabel('year')
-    plt.title('Sigmoid Adoption Rate for Space Heater End-Use Electrification')
+    plt.title('Sigmoid Adoption Rate for End-Uses Electrification')
     plt.legend(loc=2, prop={'size': 6})
     plt.grid()
 
