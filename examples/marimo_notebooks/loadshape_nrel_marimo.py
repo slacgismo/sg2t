@@ -33,6 +33,10 @@ def __(by, mo, sector, view):
 def __(
     aggregation,
     by_month,
+    checkbox_dryer,
+    checkbox_heater,
+    checkbox_oven,
+    checkbox_water,
     clothes_AR,
     clothes_year,
     cooking_AR,
@@ -58,7 +62,9 @@ def __(
         The target year, peak adoption rate year, and peak adoption rates can be changed to fit the sigmoid function. The default peak adoption rate is set to 50% at the year midway between target and initial year. 
 
         - **Target year to achieve 100% electrification:** {target_year}
-        {mo.as_html(fig1)}
+
+        
+        {mo.as_html(fig1)} Space heater: {checkbox_heater} Water heater: {checkbox_water} Clothes dryer: {checkbox_dryer} Oven: {checkbox_oven}
 
             <table style="width:30%">
       <tr>
@@ -158,6 +164,10 @@ def __(df):
 @app.cell
 def __(
     appliance,
+    checkbox_dryer,
+    checkbox_heater,
+    checkbox_oven,
+    checkbox_water,
     clothes_AR,
     clothes_year,
     cooking_AR,
@@ -197,12 +207,25 @@ def __(
         new_sup[:,i] = -sigmoid(x, L, k, x0)
 
 
-    plt.plot(x, new_sup[:,0]/1e9)
-    plt.axvline(x=X0[0], color='b', ls=':', label='Peak Adoption Year')
+    if checkbox_heater.value == True:
+        plt.plot(x, new_sup[:,0]/1e9, color='tab:blue', label = 'Space heater')
+        plt.axvline(x=X0[0],ls=':', color='tab:blue', label='Peak adoption year - space heater')
+    if checkbox_water.value == True:
+        plt.plot(x, new_sup[:,1]/1e9, color='tab:orange', label = 'Water heater')
+        plt.axvline(x=X0[1], ls=':', color='tab:orange', label='Peak adoption year - water heater')
+    if checkbox_dryer.value == True:
+        plt.plot(x, new_sup[:,2]/1e9, color='tab:green', label = 'Clothes dryer')
+        plt.axvline(x=X0[2], ls=':', color='tab:green', label='Peak adoption year - clothes dryer')
+    if checkbox_oven.value == True:
+        plt.plot(x, new_sup[:,3]/1e9,color='tab:red', label = 'Oven')
+        plt.axvline(x=X0[3], ls=':', color='tab:red', label='Peak adoption year - oven')
+
+
+    # plt.axvline(x=X0[0], color='b', ls=':', label='Peak Adoption Year')
     plt.ylabel('New Supply (billion kWh)')
     plt.xlabel('year')
     plt.title('Sigmoid Adoption Rate for Space Heater End-Use Electrification')
-    plt.legend()
+    plt.legend(loc=2, prop={'size': 6})
     plt.grid()
 
     fig1 = plt.gca()
@@ -222,6 +245,15 @@ def __(
         x,
         x0,
     )
+
+
+@app.cell
+def __(mo):
+    checkbox_heater = mo.ui.checkbox(True)
+    checkbox_water = mo.ui.checkbox(False)
+    checkbox_dryer = mo.ui.checkbox(False)
+    checkbox_oven = mo.ui.checkbox(False)
+    return checkbox_dryer, checkbox_heater, checkbox_oven, checkbox_water
 
 
 @app.cell
