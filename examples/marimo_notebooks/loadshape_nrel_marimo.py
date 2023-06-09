@@ -61,12 +61,13 @@ def __(
 
         The target year, peak adoption rate year, and peak adoption rates can be changed to fit the sigmoid function. The default peak adoption rate is set to 50% at the year midway between target and initial year. 
 
-        - **Target year to achieve 100% electrification:** {target_year}
+    <center>
+    **Target year:** {target_year}
 
-        
-        {mo.as_html(fig1)} Space heater: {checkbox_heater} Water heater: {checkbox_water} Clothes dryer: {checkbox_dryer} Oven: {checkbox_oven}
 
-            <table style="width:30%">
+    {mo.as_html(fig1)} Space heater: {checkbox_heater} Water heater: {checkbox_water} Clothes dryer: {checkbox_dryer} Oven: {checkbox_oven}</center>
+
+            <table style="width:100%">
       <tr>
         <th>End-use appliance</th>
         <th>Peak Adoption Year</th>
@@ -172,6 +173,7 @@ def __(
     clothes_year,
     cooking_AR,
     cooking_year,
+    dt,
     heater_AR,
     heater_year,
     np,
@@ -184,7 +186,7 @@ def __(
     def sigmoid(x, L, k, x0):
         return L / (1 + np.exp(-k*(x-x0)))
 
-    initial_year = 2018
+    initial_year = dt.datetime.now().year
     new_sup = np.zeros((100,4))
     final_val = np.zeros((100,4))
     X0 = [heater_year.value, water_year.value, clothes_year.value, cooking_year.value]
@@ -468,18 +470,18 @@ def __(mo):
 
 
 @app.cell
-def __(target_year):
+def __(dt, target_year):
     targ_year = target_year.value
-    curr_year = 2018
+    curr_year = dt.datetime.now().year
     return curr_year, targ_year
 
 
 @app.cell
 def __(curr_year, mo, targ_year):
-    heater_year = mo.ui.number(2018,2100, value=(targ_year + curr_year)/2)
-    water_year = mo.ui.number(2018,2100, value=(targ_year + curr_year)/2)
-    clothes_year = mo.ui.number(2018,2100, value=(targ_year + curr_year)/2)
-    cooking_year = mo.ui.number(2018,2100, value=(targ_year + curr_year)/2)
+    heater_year = mo.ui.number(2000,2100, value=(targ_year + curr_year)/2)
+    water_year = mo.ui.number(2000,2100, value=(targ_year + curr_year)/2)
+    clothes_year = mo.ui.number(2000,2100, value=(targ_year + curr_year)/2)
+    cooking_year = mo.ui.number(2000,2100, value=(targ_year + curr_year)/2)
 
     heater_AR = mo.ui.number(1,100, value=50)
     water_AR = mo.ui.number(1,100, value=50)
@@ -595,6 +597,7 @@ def __():
     import matplotlib.pyplot as plt
     import marimo as mo
     import calendar
+    import datetime as dt
 
     from sg2t.io.loadshapes.nrel.api import API
     from sg2t.io.loadshapes.nrel.naming import BUILDING_TYPES, HOME_TYPES, CLIMATE_ZONES, CLIMATE_ZONES_IECC, NREL_COL_MAPPING
@@ -608,6 +611,7 @@ def __():
         NREL_COL_MAPPING,
         Timeseries,
         calendar,
+        dt,
         mo,
         np,
         pd,
