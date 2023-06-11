@@ -18,7 +18,7 @@ def __(by, mo, sector, view):
         This tool supports loadshape analysis for residential and commercial buildings generated through NREL Resstock and Comstock models.
 
 
-        - View by {view}{by}
+        - View by {view}{by} (HI and AK not available)
 
         - Sector {sector}
 
@@ -191,7 +191,7 @@ def __(
     final_val = np.zeros((100,4))
     X0 = [heater_year.value, water_year.value, clothes_year.value, cooking_year.value]
     K = [heater_AR.value, water_AR.value, clothes_AR.value, cooking_AR.value]
-    # applying arthemtric or geometric growth rate to achieve electrification
+    # applying arithmetic or geometric growth rate to achieve electrification
     for i in range(len(appliance)):
         # Initial and target value
         initial_value = appliance[i].sum()
@@ -296,6 +296,7 @@ def __(sector):
 def __(
     Timeseries,
     aggregation,
+    by,
     day_type,
     df,
     elec_col,
@@ -307,6 +308,7 @@ def __(
     np,
     pd,
     plt,
+    study_year,
     timezone,
 ):
     # Aggregation loadshape
@@ -345,9 +347,36 @@ def __(
     # Loadshape analysis
     peak, peak_time, new_peak, new_peak_time, load_growth, supply_peak, supply_peak_time = loadshape_analysis(df_agg)
 
+    class SaveData:
+        """
+        This class determines what gets saved.
+        """
+        def __init__(self):
+            # CSV name
+            self.by_val = by.value
+            self.yr = study_year.value
+            # headers
+            # TODO: add headers to CSV corresponding to query
+            self.headers = []
+            # TODO: add units to current columns headers as well
+
+        def save_csv(self):
+            df_agg.to_csv(f'sg2t_electrification_loadshapes_{self.by_val}_{self.yr}.csv', index=False)
+            return self
+
+    save_data = SaveData()
+
+    save_to_csv = mo.ui.button(
+        value=save_data,
+        on_click=lambda save_data: save_data.save_csv(),
+        label="Save to CSV",
+    )
+
     mo.md(
         f"""
         {mo.as_html(plt.gca())}
+
+    {save_to_csv}
 
     **Total Energy supply added from current energy consumption** = {np.round(df['New Supply'].values.sum()/1e9,1)}  TWh
     #### Loadshape Peak Analysis for Post Aggregation
@@ -390,6 +419,7 @@ def __(
         """
     )
     return (
+        SaveData,
         df_agg,
         df_old_values,
         load_growth,
@@ -398,6 +428,8 @@ def __(
         peak,
         peak_time,
         run_this,
+        save_data,
+        save_to_csv,
         shift,
         supply_peak,
         supply_peak_time,
@@ -420,8 +452,6 @@ def __():
         new_val = new_peak['New Electricity Total'].values/1e3 *(60/15)
         new_peak_time = str(new_peak.hour.values[0]) + ':' + str(new_peak.minute.values[0])
         load_growth = new_peak['Load Growth'].values[0]*100
-        print('New peak load value = ' + str(new_val[0]) + ' MW')
-        print('New peak load time: ' + new_peak_time)
 
         # Greatest New Supply value and timing
         new_supply_peak = df[df['New Supply'] == df['New Supply'].max()]
@@ -478,10 +508,10 @@ def __(dt, target_year):
 
 @app.cell
 def __(curr_year, mo, targ_year):
-    heater_year = mo.ui.number(2000,2100, value=(targ_year + curr_year)/2)
-    water_year = mo.ui.number(2000,2100, value=(targ_year + curr_year)/2)
-    clothes_year = mo.ui.number(2000,2100, value=(targ_year + curr_year)/2)
-    cooking_year = mo.ui.number(2000,2100, value=(targ_year + curr_year)/2)
+    heater_year = mo.ui.number(2000,2100, value=int((targ_year + curr_year)/2))
+    water_year = mo.ui.number(2000,2100, value=int((targ_year + curr_year)/2))
+    clothes_year = mo.ui.number(2000,2100, value=int((targ_year + curr_year)/2))
+    cooking_year = mo.ui.number(2000,2100, value=int((targ_year + curr_year)/2))
 
     heater_AR = mo.ui.number(1,100, value=50)
     water_AR = mo.ui.number(1,100, value=50)
