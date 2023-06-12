@@ -100,8 +100,16 @@ class Timeseries():
         else:
             raise ValueError('Error: Aggregation input is not right; have to use one of the following: "avg", "sum", "peakday" ')  
 
-        df_aggregated = df_aggregated.reset_index(drop=True)
-        return df_aggregated
+        # change index and group by each hour
+        df_aggregated.index.names = ['hour', 'minute']
+        df_aggregated.reset_index(inplace=True)
+        df_aggregated['datetime'] = pd.to_datetime(df_aggregated['hour'].astype(str) + ':' + df_aggregated['minute'].astype(str), format='%H:%M')
+
+        # Set datetime as the index
+        df_aggregated.set_index('datetime', inplace=True)
+        df_resampled = df_aggregated.resample('H').mean()
+        df_resampled = df_resampled.drop(['hour', 'minute'], axis=1)
+        return df_resampled.reset_index(drop=True)
 
     # adjust below
     def get_daytype(self, value):
