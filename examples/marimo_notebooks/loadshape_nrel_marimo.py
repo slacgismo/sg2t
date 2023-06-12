@@ -323,12 +323,12 @@ def __(
             shift = -2 # hrs
         elif timezone.value == 'PST':
             shift = -3 # hrs
-        df_old_values = df_agg[:-shift*4]
-        df_agg = df_agg.shift(periods=shift*4)
-        df_agg[shift*4:] = df_old_values.values
+        df_old_values = df_agg[:-shift]
+        df_agg = df_agg.shift(periods=shift)
+        df_agg[shift:] = df_old_values.values
 
-    df_agg['hour'] = pd.date_range("00:00", "23:45", freq="15min").hour
-    df_agg['minute'] = pd.date_range("00:00", "23:45", freq="15min").minute
+    df_agg['hour'] = pd.date_range("00:00", "23:45", freq="1H").hour
+    # df_agg['minute'] = pd.date_range("00:00", "23:45", freq="1").minute
     df_agg["Load Growth"] = (df_agg["New Supply"]/df_agg[elec_col]).values
 
     t = np.linspace(0,24,len(df_agg))
@@ -445,18 +445,18 @@ def __():
         # Current peak value and timing
         current_peak = df[df['Electricity Total'] == df['Electricity Total'].max()]
         val = current_peak['Electricity Total'].values/1e3 *(60/15)
-        current_peak_time = str(current_peak.hour.values[0]) + ':' +str(current_peak.minute.values[0])
+        current_peak_time = str(current_peak.hour.values[0]) + ':00'
 
         # New peak value and timing
         new_peak = df[df['New Electricity Total'] == df['New Electricity Total'].max()]
         new_val = new_peak['New Electricity Total'].values/1e3 *(60/15)
-        new_peak_time = str(new_peak.hour.values[0]) + ':' + str(new_peak.minute.values[0])
+        new_peak_time = str(new_peak.hour.values[0]) + ':00'
         load_growth = new_peak['Load Growth'].values[0]*100
 
         # Greatest New Supply value and timing
         new_supply_peak = df[df['New Supply'] == df['New Supply'].max()]
         supply_val = new_supply_peak['New Supply'].values/1e3 *(60/15)
-        supply_peak_time = str(new_supply_peak.hour.values[0]) + ':' + str(new_supply_peak.minute.values[0])
+        supply_peak_time = str(new_supply_peak.hour.values[0]) + ':00'
 
         return val, current_peak_time, new_val, new_peak_time, load_growth, supply_val, supply_peak_time
     return loadshape_analysis,
