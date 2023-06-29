@@ -339,8 +339,9 @@ def __(
     plt.ylim(bottom=0)
     plt.xlabel('Hour (hr)')
     plt.ylabel('Power demand (MW)')
+    plt.xticks([0,6,12,18,24])
     # plt.title(str(by.value) + ' ' + str(sector.value) + ' Loadshape with Electrification - ' + str(aggregation.value) + ' over ' + str(by_month.value))
-    plt.grid()
+    plt.grid(alpha=0.3)
     plt.legend()
 
     # loadshape analysis
