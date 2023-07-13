@@ -1,7 +1,7 @@
 SLAC GISMo Grid Tools
 ---------------------
 
-SLAC GISMo Grid Tools is single core package for grid related data cleaning, manipulation and data science in Python. This repository contains the core package which is intended to contain the core functionality and some common tools needed for performing loadshape timeseries analysis, forecasting, and  with Python.
+SLAC GISMo Grid Tools is a Python package for grid related data cleaning, manipulation and data science. The package provides common tools needed for performing load shape timeseries analysis and forecasting. The package is being developed to support load composition analysis and advanced load modeling soon. 
 
 
 Installation 
