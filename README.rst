@@ -20,15 +20,6 @@ Clone the repository and run the command below to install as editable:
     pip install -e .
 
 
-Sg2t Coordinated Packages
--------------------------
-Below is a list of coordinated specialized packages that are developed and maintained by the SLAC GISMo team and designed to specifically use and interface with the sg2t core package:
-
-* sg2t-lca (coming soon)
-
-* sg2t-alm (coming soon)
-
-
 License
 -------
 
