@@ -27,7 +27,7 @@ class ResStock(IOBase):
     """
     def __init__(self,
                  config_name="config.ini",
-                 config_key="data.resstock",
+                 config_key="io.nrel.api",
                  metadata_file=None,
                  ):
         """ ResStock object initialization.
@@ -58,7 +58,7 @@ class ResStock(IOBase):
         except KeyError:
             return "None"
 
-    def get_data(self, filename):
+    def get_data(self, filename=None, dataframe=None):
         """Import raw ResStock data in DataFrame format.
 
         PARAMETERS
@@ -71,20 +71,29 @@ class ResStock(IOBase):
         out : pd.DataFrame
             DataFrame of data.
         """
-        if not filename:
+
+        if dataframe is not None:
+            # Read in raw data
+            self.data = pd.DataFrame(dataframe)
+            self.data = self.data.reset_index()
+            self.bldg_id = None # TODO: where is building info in API?
+            self.metadata["file"]["Building ID"] = self.bldg_id
+
+        elif not filename:
             raise FileNotFoundError(f"No data file provided.")
 
-        self.data_filename = filename
-        if not os.path.exists(self.data_filename):
-            raise FileNotFoundError(f"File not found: {self.data_filename}")
+        else:
+            self.data_filename = filename
+            if not os.path.exists(self.data_filename):
+                raise FileNotFoundError(f"File not found: {self.data_filename}")
 
-        # Add source filename to metadata
-        self.metadata["file"]["filename"] = self.data_filename
+            # Add source filename to metadata
+            self.metadata["file"]["filename"] = self.data_filename
 
-        # Read in raw data
-        self.data = pq.read_pandas(filename).to_pandas()
-        self.bldg_id = self.data.index[0]
-        self.metadata["file"]["Building ID"] = self.bldg_id
+            # Read in raw data
+            self.data = pq.read_pandas(filename).to_pandas()
+            self.bldg_id = self.data.index[0]
+            self.metadata["file"]["Building ID"] = self.bldg_id
 
         # Convert to standard format
         self._format_data()
@@ -113,8 +122,10 @@ class ResStock(IOBase):
         # Create new dataframe
         cols = list(self.keys_map.keys())
         data = pd.DataFrame(columns=cols)
-
+        print(raw_data.head(1))
+        print(raw_data["timestamp"])
         for key in list(self.keys_map.keys()):
+            print(key, self.keys_map[key])
             data[key] = raw_data[self.keys_map[key]]
 
         self.data = data

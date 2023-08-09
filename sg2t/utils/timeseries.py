@@ -13,7 +13,8 @@ class Timeseries():
         data_df.drop([date_key, time_key], inplace=True, axis=1)
         return data_df
 
-    def make_datetime(self, series):
+    @staticmethod
+    def make_datetime(series):
         """Make series vals Datetime objects"""
         try:
             series = pd.to_datetime(series)
@@ -98,7 +99,7 @@ class Timeseries():
             peak_day = df[df["Electricity Total"] == df["Electricity Total"].max()].index[0]
             df_aggregated = df[(df.index.day == peak_day.day) & (df.index.month == peak_day.month)]
         else:
-            raise ValueError('Error: Aggregation input is not right; have to use one of the following: "avg", "sum", "peakday" ')  
+            raise ValueError('Error: Aggregation input is not right; have to use one of the following: "avg", "sum", "peak_day" ')
 
         # change index and group by each hour
         df_aggregated.index.names = ['hour', 'minute']

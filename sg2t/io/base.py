@@ -143,7 +143,7 @@ class IOBase(Timeseries):
             timestamp = (datetime.datetime.now()).strftime("%Y-%m-%d_%H-%M-%S-%f")[:-4]
             if not filename:
                 filename = f"sg2t_base_data_{timestamp}"
-                metada_filename = f"sg2t_base_metadata_{timestamp}"
+                metadata_filename = f"sg2t_base_metadata_{timestamp}"
             else:
                 filename = filename + "_" + timestamp
                 metadata_filename = f"metadata_{filename}"
