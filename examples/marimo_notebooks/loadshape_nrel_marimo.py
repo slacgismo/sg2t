@@ -205,8 +205,8 @@ def __(
         # Generate x values
         x = np.linspace(initial_year, target_year.value, 100)
 
-        final_val[:,i] = sigmoid(x, L, k, x0) + initial_value
-        new_sup[:,i] = -sigmoid(x, L, k, x0)
+        new_sup[:,i] = sigmoid(x, 1, k, x0)
+        new_sup[:,i] = (new_sup[:,i] - min(new_sup[:,i])) / (max(new_sup[:,i]) - min(new_sup[:,i])) * initial_value
 
 
     if checkbox_heater.value == True:
