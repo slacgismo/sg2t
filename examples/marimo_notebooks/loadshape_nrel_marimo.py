@@ -150,7 +150,7 @@ def __(df):
     resstock_heating = df[['Fuel Oil Heating', 'Natural Gas Heating', 'Propane Heating']].sum(axis=1)
     resstock_water_heating = df[['Fuel Oil Hot Water','Natural Gas Hot Water','Propane Hot Water']].sum(axis=1)
     resstock_clothes_dryer = df[['Natural Gas Clothes Dryer', 'Propane Clothes Dryer']].sum(axis=1)
-    resstock_oven = df[['Natural Gas Oven', 'Propane Clothes Dryer']].sum(axis=1)
+    resstock_oven = df[['Natural Gas Oven', 'Propane Oven']].sum(axis=1)
     #----------------------------------------------------------------------------#
     appliance = [resstock_heating, resstock_water_heating, resstock_clothes_dryer, resstock_oven]
     return (
@@ -262,23 +262,45 @@ def __(mo):
 def __(
     K,
     X0,
+    appliance,
     df,
     elec_col,
+    initial_year,
     np,
-    resstock_clothes_dryer,
-    resstock_heating,
-    resstock_oven,
-    resstock_water_heating,
+    sigmoid,
     study_year,
+    target_year,
 ):
     # Calculating the new supply for a given year
     year = int(study_year.value)
-    new_supply = resstock_heating*(1/(1+np.exp(-K[0]/100*(year - X0[0])))) +  resstock_water_heating*(1/(1+np.exp(-K[1]/100*(year - X0[1])))) + resstock_clothes_dryer*(1/(1+np.exp(-K[2]/100*(year - X0[2])))) + resstock_oven*(1/(1+np.exp(-K[3]/100*(year - X0[3]))))
+    # new_supply = resstock_heating*(1/(1+np.exp(-K[0]/100*(year - X0[0])))) +  resstock_water_heating*(1/(1+np.exp(-K[1]/100*(year - X0[1])))) + resstock_clothes_dryer*(1/(1+np.exp(-K[2]/100*(year - X0[2])))) + resstock_oven*(1/(1+np.exp(-K[3]/100*(year - X0[3]))))
+
+
+    # if study year is after target year, set it to target year
+    if year > target_year.value:
+        year = target_year.value
+
+    x1 = np.arange(initial_year, target_year.value + 1, 1)
+    year_idx = list(x1).index(year)
+
+    new_sup_sum = []
+
+    for ii, ap in enumerate(appliance):
+        # Get new supply for all years 
+        new_sup1 = sigmoid(x1, 1, K[ii]/100, X0[ii])
+        # Normalize sigmoid from 0 to 1
+        new_sup1 = (new_sup1 - min(new_sup1)) / (max(new_sup1) - min(new_sup1))
+        # For a given study year, retrieve the corresponding index
+        new_sup1 = new_sup1[year_idx] * ap
+        new_sup_sum.append(new_sup1.values)
+
+    # Sum up the value for all appliances
+    new_supply = np.asarray(new_sup_sum).transpose().sum(axis=1) 
 
     df['New Supply'] = new_supply
     df['New Electricity Total'] = new_supply  + df[elec_col]
 
-    return new_supply, year
+    return ap, ii, new_sup1, new_sup_sum, new_supply, x1, year, year_idx
 
 
 @app.cell
