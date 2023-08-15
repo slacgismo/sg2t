@@ -226,7 +226,7 @@ def __(
     # plt.axvline(x=X0[0], color='b', ls=':', label='Peak Adoption Year')
     plt.ylabel('New Supply (billion kWh)')
     plt.xlabel('year')
-    plt.title('Sigmoid Adoption Rate for End-Uses Electrification')
+    plt.title(f'Sigmoid Adoption Rate for End-Uses Electrification \n Target Year {target_year.value}')
     plt.legend(loc=2, prop={'size': 6})
     plt.grid()
 
@@ -331,6 +331,7 @@ def __(
     pd,
     plt,
     study_year,
+    target_year,
     timezone,
 ):
     # Aggregation loadshape
@@ -364,9 +365,9 @@ def __(
     plt.xticks([0,6,12,18,24])
     # plt.title(str(by.value) + ' ' + str(sector.value) + ' Loadshape with Electrification - ' + str(aggregation.value) + ' over ' + str(by_month.value))
     plt.grid(alpha=0.3)
+    plt.title(f"Aggregated Loadshape \n Study Year {study_year.value}, Target Year {target_year.value}")
     plt.legend()
 
-    # loadshape analysis
     # Loadshape analysis
     peak, peak_time, new_peak, new_peak_time, load_growth, supply_peak, supply_peak_time = loadshape_analysis(df_agg)
 
