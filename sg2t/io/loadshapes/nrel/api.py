@@ -39,7 +39,7 @@ class API():
                              "nrel-pds-building-stock/" \
                              "end-use-load-profiles-for-us-building-stock/",
             "resstock": "2022/resstock_amy2018_release_1/",
-            "comstock": "2021/comstock_amy2018_release_1/"
+            "comstock": "2023/comstock_amy2018_release_1/"
         }
         # Climate zones
         self.climate_zones = ("cold", "hot-dry", "hot-humid", "marine", "mixed-dry",
@@ -137,7 +137,8 @@ class API():
         df.index = pd.to_datetime(df.index)
         return df
 
-    def get_data_comstock_by_climatezone(self, climate, building_type):
+    # TODO: update comstock API calls (only state one is updated)
+    def get_data_comstock_by_climatezone(self, climate, building_type, upgrade=0):
         """Pulls CSV"""
         climate = climate.lower()
 
@@ -145,7 +146,7 @@ class API():
         if climate == "very-cold":
             climate = "very_cold"
 
-        filename = f"{climate}-{building_type}.csv"
+        filename = f"up{upgrade:00}-{climate}-{building_type}.csv"
         timeseries_aggregate_climate = f"timeseries_aggregates/" \
                                        f"by_building_america_climate_zone/" \
                                        f"{filename}"
@@ -157,10 +158,10 @@ class API():
         df.index = pd.to_datetime(df.index)
         return df
 
-    def get_data_comstock_by_climatezone_iecc(self, climate, building_type):
+    def get_data_comstock_by_climatezone_iecc(self, climate, building_type, upgrade=0):
         """Pulls CSV"""
         
-        filename = f"{climate.lower()}-{building_type}.csv"
+        filename = f"up{upgrade:00}-{climate.lower()}-{building_type}.csv"
         timeseries_aggregate_climate = f"timeseries_aggregates/" \
                                        f"by_ashrae_iecc_climate_zone_2004/" \
                                        f"{filename}"
@@ -173,20 +174,22 @@ class API():
         df.index = pd.to_datetime(df.index)
         return df
 
-    def get_data_comstock_by_state(self, state, building_type):
+    def get_data_comstock_by_state(self, state, building_type, upgrade=0):
         """Pulls CSV"""
         state = state.upper()
 
-        filename = f"{state.lower()}-{building_type}.csv"
-        timeseries_aggregate_climate = f"timeseries_aggregates/" \
-                                       f"by_state/" \
-                                       f"state={state}/" \
-                                       f"{filename}"
+        filename = f"up{upgrade:02}-{state.lower()}-{building_type}.csv"
+        timeseries_aggregate_state = f"timeseries_aggregates/" \
+                                     f"by_state/" \
+                                     f"upgrade={upgrade}/" \
+                                     f"state={state}/" \
+                                     f"{filename}"
 
-        url = self.paths_amy_2018_v1["end_use_loads"] + \
-              self.paths_amy_2018_v1["comstock"] + \
-              timeseries_aggregate_climate
-        df = pd.read_csv(url, index_col=2)
+
+        url =  self.paths_amy_2018_v1["end_use_loads"] +\
+               self.paths_amy_2018_v1["comstock"] + \
+               timeseries_aggregate_state
+        df = pd.read_csv(url, index_col=3)
         df.index = pd.to_datetime(df.index)
         return df
 

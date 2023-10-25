@@ -22,7 +22,7 @@ def __(by, mo, sector, view):
 
         - Sector {sector}
 
-        - View by Building Type {type} <br />
+        - View by Building Type {view} <br />
 
         """
     )
@@ -126,19 +126,19 @@ def __(API, NREL_COL_MAPPING, by, checkbox_run, sector, view):
     api = API()
     if sector.value == 'Resstock' and checkbox_run.value == True:
         if view.value == 'state':      
-            df = api.get_data_resstock_by_state(by.value, type.value)
+            df = api.get_data_resstock_by_state(by.value, view.value)
         elif view.value == 'climate zone - building America':
-            df = api.get_data_resstock_by_climatezone(by.value, type.value)
+            df = api.get_data_resstock_by_climatezone(by.value, view.value)
         elif view.value == 'climate zone - iecc':
-            df = api.get_data_resstock_by_climatezone_iecc(by.value, type.value)
+            df = api.get_data_resstock_by_climatezone_iecc(by.value, view.value)
 
     elif sector.value == 'Comstock' and checkbox_run.value == True:
         if view.value == 'state':      
-            df = api.get_data_comstock_by_state(by.value, type.value)
+            df = api.get_data_comstock_by_state(by.value, view.value)
         elif view.value == 'climate zone - building America':
-            df = api.get_data_comstock_by_climatezone(by.value, type.value)
+            df = api.get_data_comstock_by_climatezone(by.value, view.value)
         elif view.value == 'climate zone - iecc':
-            df = api.get_data_comstock_by_climatezone_iecc(by.value, type.value)      
+            df = api.get_data_comstock_by_climatezone_iecc(by.value, view.value)      
     df = _format_columns_df(df)
     df = df[:-1]
     return api, df
@@ -150,7 +150,7 @@ def __(df):
     resstock_heating = df[['Fuel Oil Heating', 'Natural Gas Heating', 'Propane Heating']].sum(axis=1)
     resstock_water_heating = df[['Fuel Oil Hot Water','Natural Gas Hot Water','Propane Hot Water']].sum(axis=1)
     resstock_clothes_dryer = df[['Natural Gas Clothes Dryer', 'Propane Clothes Dryer']].sum(axis=1)
-    resstock_oven = df[['Natural Gas Oven', 'Propane Clothes Dryer']].sum(axis=1)
+    resstock_oven = df[['Natural Gas Oven', 'Propane Oven']].sum(axis=1)
     #----------------------------------------------------------------------------#
     appliance = [resstock_heating, resstock_water_heating, resstock_clothes_dryer, resstock_oven]
     return (
@@ -205,8 +205,8 @@ def __(
         # Generate x values
         x = np.linspace(initial_year, target_year.value, 100)
 
-        final_val[:,i] = sigmoid(x, L, k, x0) + initial_value
-        new_sup[:,i] = -sigmoid(x, L, k, x0)
+        new_sup[:,i] = sigmoid(x, 1, k, x0)
+        new_sup[:,i] = (new_sup[:,i] - min(new_sup[:,i])) / (max(new_sup[:,i]) - min(new_sup[:,i])) * initial_value
 
 
     if checkbox_heater.value == True:
@@ -226,7 +226,7 @@ def __(
     # plt.axvline(x=X0[0], color='b', ls=':', label='Peak Adoption Year')
     plt.ylabel('New Supply (billion kWh)')
     plt.xlabel('year')
-    plt.title('Sigmoid Adoption Rate for End-Uses Electrification')
+    plt.title(f'Sigmoid Adoption Rate for End-Uses Electrification \n Target Year {target_year.value}')
     plt.legend(loc=2, prop={'size': 6})
     plt.grid()
 
@@ -262,23 +262,45 @@ def __(mo):
 def __(
     K,
     X0,
+    appliance,
     df,
     elec_col,
+    initial_year,
     np,
-    resstock_clothes_dryer,
-    resstock_heating,
-    resstock_oven,
-    resstock_water_heating,
+    sigmoid,
     study_year,
+    target_year,
 ):
     # Calculating the new supply for a given year
     year = int(study_year.value)
-    new_supply = resstock_heating*(1/(1+np.exp(-K[0]/100*(year - X0[0])))) +  resstock_water_heating*(1/(1+np.exp(-K[1]/100*(year - X0[1])))) + resstock_clothes_dryer*(1/(1+np.exp(-K[2]/100*(year - X0[2])))) + resstock_oven*(1/(1+np.exp(-K[3]/100*(year - X0[3]))))
+    # new_supply = resstock_heating*(1/(1+np.exp(-K[0]/100*(year - X0[0])))) +  resstock_water_heating*(1/(1+np.exp(-K[1]/100*(year - X0[1])))) + resstock_clothes_dryer*(1/(1+np.exp(-K[2]/100*(year - X0[2])))) + resstock_oven*(1/(1+np.exp(-K[3]/100*(year - X0[3]))))
+
+
+    # if study year is after target year, set it to target year
+    if year > target_year.value:
+        year = target_year.value
+
+    x1 = np.arange(initial_year, target_year.value + 1, 1)
+    year_idx = list(x1).index(year)
+
+    new_sup_sum = []
+
+    for ii, ap in enumerate(appliance):
+        # Get new supply for all years 
+        new_sup1 = sigmoid(x1, 1, K[ii]/100, X0[ii])
+        # Normalize sigmoid from 0 to 1
+        new_sup1 = (new_sup1 - min(new_sup1)) / (max(new_sup1) - min(new_sup1))
+        # For a given study year, retrieve the corresponding index
+        new_sup1 = new_sup1[year_idx] * ap
+        new_sup_sum.append(new_sup1.values)
+
+    # Sum up the value for all appliances
+    new_supply = np.asarray(new_sup_sum).transpose().sum(axis=1) 
 
     df['New Supply'] = new_supply
     df['New Electricity Total'] = new_supply  + df[elec_col]
 
-    return new_supply, year
+    return ap, ii, new_sup1, new_sup_sum, new_supply, x1, year, year_idx
 
 
 @app.cell
@@ -309,6 +331,7 @@ def __(
     pd,
     plt,
     study_year,
+    target_year,
     timezone,
 ):
     # Aggregation loadshape
@@ -323,12 +346,12 @@ def __(
             shift = -2 # hrs
         elif timezone.value == 'PST':
             shift = -3 # hrs
-        df_old_values = df_agg[:-shift*4]
-        df_agg = df_agg.shift(periods=shift*4)
-        df_agg[shift*4:] = df_old_values.values
+        df_old_values = df_agg[:-shift]
+        df_agg = df_agg.shift(periods=shift)
+        df_agg[shift:] = df_old_values.values
 
-    df_agg['hour'] = pd.date_range("00:00", "23:45", freq="15min").hour
-    df_agg['minute'] = pd.date_range("00:00", "23:45", freq="15min").minute
+    df_agg['hour'] = pd.date_range("00:00", "23:45", freq="1H").hour
+    # df_agg['minute'] = pd.date_range("00:00", "23:45", freq="1").minute
     df_agg["Load Growth"] = (df_agg["New Supply"]/df_agg[elec_col]).values
 
     t = np.linspace(0,24,len(df_agg))
@@ -339,11 +362,12 @@ def __(
     plt.ylim(bottom=0)
     plt.xlabel('Hour (hr)')
     plt.ylabel('Power demand (MW)')
+    plt.xticks([0,6,12,18,24])
     # plt.title(str(by.value) + ' ' + str(sector.value) + ' Loadshape with Electrification - ' + str(aggregation.value) + ' over ' + str(by_month.value))
-    plt.grid()
+    plt.grid(alpha=0.3)
+    plt.title(f"Aggregated Loadshape \n Study Year {study_year.value}, Target Year {target_year.value}")
     plt.legend()
 
-    # loadshape analysis
     # Loadshape analysis
     peak, peak_time, new_peak, new_peak_time, load_growth, supply_peak, supply_peak_time = loadshape_analysis(df_agg)
 
@@ -445,18 +469,18 @@ def __():
         # Current peak value and timing
         current_peak = df[df['Electricity Total'] == df['Electricity Total'].max()]
         val = current_peak['Electricity Total'].values/1e3 *(60/15)
-        current_peak_time = str(current_peak.hour.values[0]) + ':' +str(current_peak.minute.values[0])
+        current_peak_time = str(current_peak.hour.values[0]) + ':00'
 
         # New peak value and timing
         new_peak = df[df['New Electricity Total'] == df['New Electricity Total'].max()]
         new_val = new_peak['New Electricity Total'].values/1e3 *(60/15)
-        new_peak_time = str(new_peak.hour.values[0]) + ':' + str(new_peak.minute.values[0])
+        new_peak_time = str(new_peak.hour.values[0]) + ':00'
         load_growth = new_peak['Load Growth'].values[0]*100
 
         # Greatest New Supply value and timing
         new_supply_peak = df[df['New Supply'] == df['New Supply'].max()]
         supply_val = new_supply_peak['New Supply'].values/1e3 *(60/15)
-        supply_peak_time = str(new_supply_peak.hour.values[0]) + ':' + str(new_supply_peak.minute.values[0])
+        supply_peak_time = str(new_supply_peak.hour.values[0]) + ':00'
 
         return val, current_peak_time, new_val, new_peak_time, load_growth, supply_val, supply_peak_time
     return loadshape_analysis,

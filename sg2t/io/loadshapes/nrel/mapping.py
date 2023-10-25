@@ -36,11 +36,6 @@ def get_map(metadata_file):
     # Map required cols
     sg2t_cols = {
         "Datetime": "timestamp",
-        "Electricity Cooling": "out.electricity.cooling.energy_consumption",
-        "Electricity Heating": "out.electricity.heating.energy_consumption",
-        "Fuel Oil Heating": "out.fuel_oil.heating.energy_consumption",
-        "Natural Gas Heating": "out.natural_gas.heating.energy_consumption",
-        "Propane Heating": "out.propane.heating.energy_consumption",
         "Site Energy Total": "out.site_energy.total.energy_consumption",
         "Electricity Total": "out.electricity.total.energy_consumption",
         "Fuel Oil Total": "out.fuel_oil.total.energy_consumption",
