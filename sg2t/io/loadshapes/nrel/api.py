@@ -192,3 +192,10 @@ class API():
         df = pd.read_csv(url, index_col=3)
         df.index = pd.to_datetime(df.index)
         return df
+
+api = API()
+df = api.get_data_resstock_by_state(state='CA', home_type='single-family_detached')
+
+from sg2t.utils.timeseries import Timeseries
+
+df_agg = Timeseries.timeseries_aggregate(df, aggregation='avg', month_start=1, month_end=2)
