@@ -22,7 +22,7 @@ def __(by, mo, sector, view):
 
         - Sector {sector}
 
-        - View by Building Type {type} <br />
+        - View by Building Type {view} <br />
 
         """
     )
@@ -126,19 +126,19 @@ def __(API, NREL_COL_MAPPING, by, checkbox_run, sector, view):
     api = API()
     if sector.value == 'Resstock' and checkbox_run.value == True:
         if view.value == 'state':      
-            df = api.get_data_resstock_by_state(by.value, type.value)
+            df = api.get_data_resstock_by_state(by.value, view.value)
         elif view.value == 'climate zone - building America':
-            df = api.get_data_resstock_by_climatezone(by.value, type.value)
+            df = api.get_data_resstock_by_climatezone(by.value, view.value)
         elif view.value == 'climate zone - iecc':
-            df = api.get_data_resstock_by_climatezone_iecc(by.value, type.value)
+            df = api.get_data_resstock_by_climatezone_iecc(by.value, view.value)
 
     elif sector.value == 'Comstock' and checkbox_run.value == True:
         if view.value == 'state':      
-            df = api.get_data_comstock_by_state(by.value, type.value)
+            df = api.get_data_comstock_by_state(by.value, view.value)
         elif view.value == 'climate zone - building America':
-            df = api.get_data_comstock_by_climatezone(by.value, type.value)
+            df = api.get_data_comstock_by_climatezone(by.value, view.value)
         elif view.value == 'climate zone - iecc':
-            df = api.get_data_comstock_by_climatezone_iecc(by.value, type.value)      
+            df = api.get_data_comstock_by_climatezone_iecc(by.value, view.value)      
     df = _format_columns_df(df)
     df = df[:-1]
     return api, df
