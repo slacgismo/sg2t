@@ -11,7 +11,7 @@ def __(mo):
 
 
 @app.cell
-def __(by, mo, sector, view):
+def __(by, mo, sector, type, view):
     mo.md(
         f"""
     ## **Sector**
@@ -22,7 +22,7 @@ def __(by, mo, sector, view):
 
         - Sector {sector}
 
-        - View by Building Type {view} <br />
+        - View by Building Type {type} <br />
 
         """
     )
@@ -115,7 +115,7 @@ def __(
 
 
 @app.cell
-def __(API, NREL_COL_MAPPING, by, checkbox_run, sector, view):
+def __(API, NREL_COL_MAPPING, by, checkbox_run, sector, type, view):
     def _format_columns_df(df):
          # rename columns using NREL_COL_MAPPING and drop the rest of the columns
         df.rename(columns=NREL_COL_MAPPING, inplace = True)
@@ -126,19 +126,19 @@ def __(API, NREL_COL_MAPPING, by, checkbox_run, sector, view):
     api = API()
     if sector.value == 'Resstock' and checkbox_run.value == True:
         if view.value == 'state':      
-            df = api.get_data_resstock_by_state(by.value, view.value)
+            df = api.get_data_resstock_by_state(by.value, type.value)
         elif view.value == 'climate zone - building America':
-            df = api.get_data_resstock_by_climatezone(by.value, view.value)
+            df = api.get_data_resstock_by_climatezone(by.value, type.value)
         elif view.value == 'climate zone - iecc':
-            df = api.get_data_resstock_by_climatezone_iecc(by.value, view.value)
+            df = api.get_data_resstock_by_climatezone_iecc(by.value, type.value)
 
     elif sector.value == 'Comstock' and checkbox_run.value == True:
         if view.value == 'state':      
-            df = api.get_data_comstock_by_state(by.value, view.value)
+            df = api.get_data_comstock_by_state(by.value, type.value)
         elif view.value == 'climate zone - building America':
-            df = api.get_data_comstock_by_climatezone(by.value, view.value)
+            df = api.get_data_comstock_by_climatezone(by.value, type.value)
         elif view.value == 'climate zone - iecc':
-            df = api.get_data_comstock_by_climatezone_iecc(by.value, view.value)      
+            df = api.get_data_comstock_by_climatezone_iecc(by.value, type.value)
     df = _format_columns_df(df)
     df = df[:-1]
     return api, df
@@ -592,7 +592,7 @@ def __(
     state,
     view,
 ):
-    # Dropdown option depedency
+    # Dropdown option dependency
     if view.value == 'state':
         by = state
     elif view.value == 'climate zone - building America':
