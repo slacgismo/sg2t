@@ -58,7 +58,7 @@ def __(by, mo, sector, type, view):
     <table>
         <caption>Table 1: Scenario description</caption>
         <tr><th align=left>Select an aggregation region</th><td align=left>{view}{by}</td><td align=left>(HI and AK not available)</td></tr>
-        <tr><th align=left>Select the customer sector (e.g., residential, commercial)</th><td align=left>{sector}</td></tr>
+        <tr><th align=left>Select the load sector (e.g., residential, commercial)</th><td align=left>{sector}</td></tr>
         <tr><th align=left>Select the customer subsector (e.g., building type)</th><td align=left>{type}</td></tr>
     </table>
 
@@ -641,7 +641,8 @@ def __(BUILDING_TYPES, CLIMATE_ZONES, CLIMATE_ZONES_IECC, HOME_TYPES, mo):
 
     climate_zone = mo.ui.dropdown(CLIMATE_ZONES, value = CLIMATE_ZONES[0])
     climate_zone_iecc = mo.ui.dropdown(CLIMATE_ZONES_IECC, value = CLIMATE_ZONES_IECC[0])
-    sector =  mo.ui.dropdown(['Resstock', 'Comstock'], value = 'Resstock')
+    sector =  mo.ui.dropdown(['Resstock'], # ['Resstock', 'Comstock'] disabled comstock for now because it doesn't work
+                             value = 'Resstock')
     building_type = mo.ui.dropdown(BUILDING_TYPES, value = BUILDING_TYPES[1])
     home_type =  mo.ui.dropdown(HOME_TYPES, value = HOME_TYPES[1])
     states = [ 'AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
