@@ -207,6 +207,7 @@ def __(
 
 @app.cell
 def __(
+    by,
     df,
     load_growth,
     mo,
@@ -228,7 +229,7 @@ def __(
 
     ## Loadshape Forecast Summary Results
 
-    The result of the analysis estimates that the total new energy supply required to meet the load growth from electriciation is {np.round(df['New Supply'].values.sum()/1e9,1)} TWh.  A summary of the peak load impacts is shown in Table 4.
+    The result of the analysis suggests that the total new energy supply required to meet the load growth from electricifation of {type.value} in {by.value} is {np.round(df['New Supply'].values.sum()/1e9,1)} TWh.  A summary of the peak load impacts is shown in Table 4.
 
     <table style="width:50%">
       <caption>Table 4 - Peak load changes for {type.value} in {study_year.value}</caption>
@@ -261,7 +262,7 @@ def __(
         <th>Load Growth</th>
         <td>{np.round(load_growth,2)} </td>
         <td>% </td>
-        <td>{new_peak_time} </td>
+        <td></td>
       </tr>
     </table>
 
