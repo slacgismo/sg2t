@@ -51,7 +51,7 @@ def __(by, mo, sector, type, view):
         f"""
     ## Introduction
 
-    This tool performs loadshape forecasting for residential and commercial buildings using publicly available datasets. Building loadshapes are generated using NREL <a href="https://resstock.nrel.gov/" target="_blank">Resstock</a> and <a href="https://comstock.nrel.gov/" target="_blank">Comstock</a> data sets. An important assumption in electricity loadshape forecasts is the amount of natural gas consumption that will be converted to electric energy demand, which are expected to vary by region, sector, and subsector. 
+    This tool performs loadshape forecasting for residential and commercial buildings using publicly available datasets. Building loadshapes are generated using NREL <a href="https://resstock.nrel.gov/" target="_blank">Resstock</a> and <a href="https://comstock.nrel.gov/" target="_blank">Comstock</a> data sets. An important assumption in electricity loadshape forecasts is the amount of natural gas consumption that will be converted to electric energy demand, which is expected to vary by region, sector, and subsector. 
 
     The first step is generating a loadshape forecast is to identify the region, sector, and subsector for which you want the loadshape forecast, as shown in Table 1.
 
