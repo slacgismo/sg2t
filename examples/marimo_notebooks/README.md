@@ -7,7 +7,6 @@ This notebook requires the use of Marimo. See https://github.com/marimo-team/mar
 ~~~
 python3 -m venv .
 . bin/activate
-python3 -m pip install -r ../../requirements.txt
 python3 -m pip install ../..
 ~~~
 

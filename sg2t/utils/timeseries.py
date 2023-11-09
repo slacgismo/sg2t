@@ -91,9 +91,9 @@ class Timeseries():
 
         # aggregate data using groupby with the corrosponding aggregation type
         if aggregation == 'avg':
-            df_aggregated = df.groupby([(df.index.hour),(df.index.minute)]).mean()
+            df_aggregated = df.groupby([(df.index.hour),(df.index.minute)]).mean(numeric_only=True)
         elif aggregation == 'sum':
-            df_aggregated = df.groupby([(df.index.hour),(df.index.minute)]).sum()
+            df_aggregated = df.groupby([(df.index.hour),(df.index.minute)]).sum(numeric_only=True)
         elif aggregation == 'peak_day':
             # find peak load day based on "Electricity Total" column
             peak_day = df[df["Electricity Total"] == df["Electricity Total"].max()].index[0]

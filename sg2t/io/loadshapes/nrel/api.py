@@ -133,7 +133,10 @@ class API():
         url =  self.paths_amy_2018_v1["end_use_loads"] +\
                self.paths_amy_2018_v1["resstock"] + \
                timeseries_aggregate_state
-        df = pd.read_csv(url, index_col=3)
+        try:
+            df = pd.read_csv(url, index_col=3)
+        except Exception as err:
+            raise Exception(f"{err} (URL='{url}')")
         df.index = pd.to_datetime(df.index)
         return df
 
