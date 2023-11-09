@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.1.45"
+__generated_with = "0.1.38"
 app = marimo.App(width="full")
 
 
@@ -11,6 +11,7 @@ def __(
     electrification_view,
     loadshape_view,
     mo,
+    report_view,
     results_view,
     sector_view,
 ):
@@ -31,6 +32,7 @@ def __(
             "Loadshape" : loadshape_view,
             "Results" : results_view,
             "Data" : data_view,
+            "Report" : report_view,
             "About" : credits_view,
         }),
         mo.md("""---
@@ -40,6 +42,27 @@ def __(
     *Copyright (C) 2023 Regents of the Leland Stanford Junior University*""")
     ])
     return
+
+
+@app.cell
+def __(
+    credits_view,
+    data_view,
+    electrification_view,
+    loadshape_view,
+    mo,
+    results_view,
+    sector_view,
+):
+    report_view = mo.vstack([
+        sector_view,
+        electrification_view,
+        loadshape_view,
+        results_view,
+        data_view,
+        credits_view,
+    ])
+    return report_view,
 
 
 @app.cell
@@ -115,7 +138,7 @@ def __(
     (f"""
         <td>{heater_year} </td>
         <td>{heater_AR}%  </td>
-    """ if checkbox_heater.value else "") +
+    """ if checkbox_heater.value else "<td colspan=2>(na)</td>") +
     f"""
       </tr>
       <tr>
@@ -125,7 +148,7 @@ def __(
     (f"""
         <td>{water_year} </td>
         <td>{water_AR}% </td>
-    """ if checkbox_water.value else "") +
+    """ if checkbox_water.value else "<td colspan=2>(na)</td>") +
     f"""
       </tr>
       <tr>
@@ -135,7 +158,7 @@ def __(
     (f"""
         <td>{clothes_year} </td>
         <td>{clothes_AR}% </td>
-    """ if checkbox_dryer.value else "") +
+    """ if checkbox_dryer.value else "<td colspan=2>(na)</td>") +
     f"""
       </tr>
       <tr>
@@ -146,7 +169,7 @@ def __(
         <td>{cooking_year} </td>
         <td>{cooking_AR}% </td>
       </tr>
-    """ if checkbox_oven.value else "") +
+    """ if checkbox_oven.value else "<td colspan=2>(na)</td>") +
     f"""  
     </table>
 
