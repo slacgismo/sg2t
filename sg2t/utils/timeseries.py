@@ -89,7 +89,7 @@ class Timeseries():
         else: 
             raise ValueError('Error: Weekday input is not right; have to use either "weekday" or "weekend" ')
 
-        # aggregate data using groupby with the corrosponding aggregation type
+        # aggregate data using groupby with the corresponding aggregation type
         if aggregation == 'avg':
             df_aggregated = df.groupby([(df.index.hour),(df.index.minute)]).mean(numeric_only=True)
         elif aggregation == 'sum':

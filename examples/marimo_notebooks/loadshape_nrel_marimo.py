@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.1.38"
+__generated_with = "0.1.64"
 app = marimo.App(width="full")
 
 
@@ -93,21 +93,23 @@ def __(by, mo, sector, type, view):
 
 @app.cell
 def __(
-    checkbox_dryer,
-    checkbox_heater,
-    checkbox_oven,
-    checkbox_water,
-    clothes_AR,
-    clothes_year,
-    cooking_AR,
-    cooking_year,
+    appliance_name,
+    checkbox_eu1,
+    checkbox_eu2,
+    checkbox_eu3,
+    checkbox_eu4,
+    eu1_AR,
+    eu1_year,
+    eu2_AR,
+    eu2_year,
+    eu3_AR,
+    eu3_year,
+    eu4_AR,
+    eu4_year,
     fig1,
-    heater_AR,
-    heater_year,
     mo,
+    start_year,
     target_year,
-    water_AR,
-    water_year,
 ):
     #
     # Electrification potential view tab
@@ -121,6 +123,7 @@ def __(
 
     The target year specifies the year when technology adoption reaches a steady state turn-over rate. The peak adoption year rate can be changed to adjust the shape of the technology adoption function. The default peak adoption rate is set to 50% at the year midway between target and current year. These options are specified in Table 2.
 
+    Start year: {start_year}
     Target year: {target_year}
 
     <table>
@@ -132,44 +135,44 @@ def __(
         <th>Peak Rate </th>
       </tr>
       <tr>
-        <th>Space heating</th>
-        <td>{checkbox_heater}</td>
+        <th>{appliance_name[0]}</th>
+        <td>{checkbox_eu1}</td>
     """ +
     (f"""
-        <td>{heater_year} </td>
-        <td>{heater_AR}%  </td>
-    """ if checkbox_heater.value else "<td colspan=2>(na)</td>") +
+        <td>{eu1_year} </td>
+        <td>{eu1_AR}%  </td>
+    """ if checkbox_eu1.value else "<td colspan=2>(na)</td>") +
     f"""
       </tr>
       <tr>
-        <th>Water heating</th>
-        <td>{checkbox_water}</td>
+        <th>{appliance_name[1]}</th>
+        <td>{checkbox_eu2}</td>
     """ +
     (f"""
-        <td>{water_year} </td>
-        <td>{water_AR}% </td>
-    """ if checkbox_water.value else "<td colspan=2>(na)</td>") +
+        <td>{eu2_year} </td>
+        <td>{eu2_AR}% </td>
+    """ if checkbox_eu2.value else "<td colspan=2>(na)</td>") +
     f"""
       </tr>
       <tr>
-        <th>Clothes drying</th>
-        <td>{checkbox_dryer}</td>
+        <th>{appliance_name[2]}</th>
+        <td>{checkbox_eu3}</td>
     """ +
     (f"""
-        <td>{clothes_year} </td>
-        <td>{clothes_AR}% </td>
-    """ if checkbox_dryer.value else "<td colspan=2>(na)</td>") +
+        <td>{eu3_year} </td>
+        <td>{eu3_AR}% </td>
+    """ if checkbox_eu3.value else "<td colspan=2>(na)</td>") +
     f"""
       </tr>
       <tr>
-        <th>Cooking</th>
-        <td>{checkbox_oven}</td>
+        <th>{appliance_name[3]}</th>
+        <td>{checkbox_eu4}</td>
     """ +
     (f"""
-        <td>{cooking_year} </td>
-        <td>{cooking_AR}% </td>
+        <td>{eu4_year} </td>
+        <td>{eu4_AR}% </td>
       </tr>
-    """ if checkbox_oven.value else "<td colspan=2>(na)</td>") +
+    """ if checkbox_eu4.value else "<td colspan=2>(na)</td>") +
     f"""  
     </table>
 
@@ -339,6 +342,7 @@ def __(API, NREL_COL_MAPPING, by, checkbox_run, sector, type, view):
 
     # Import annual energy data
     api = API()
+    # try:
     if sector.value == 'Resstock' and checkbox_run.value == True:
         if view.value == 'state':
             df = api.get_data_resstock_by_state(by.value, type.value)
@@ -354,52 +358,61 @@ def __(API, NREL_COL_MAPPING, by, checkbox_run, sector, type, view):
             df = api.get_data_comstock_by_climatezone(by.value, type.value)
         elif view.value == 'climate zone - iecc':
             df = api.get_data_comstock_by_climatezone_iecc(by.value, type.value)
+    # except HTTPError:
+    #     raise
+        
     df = _format_columns_df(df)
     df = df[:-1]
     return api, df
 
 
 @app.cell
-def __(df):
+def __(df, sector):
     # 
     # Calculation Step 1
-    #
 
-    # calculate the total annual non-electric energy use for the different end-uses
-    resstock_heating = df[['Fuel Oil Heating', 'Natural Gas Heating', 'Propane Heating']].sum(axis=1)
-    resstock_water_heating = df[['Fuel Oil Hot Water','Natural Gas Hot Water','Propane Hot Water']].sum(axis=1)
-    resstock_clothes_dryer = df[['Natural Gas Clothes Dryer', 'Propane Clothes Dryer']].sum(axis=1)
-    resstock_oven = df[['Natural Gas Oven', 'Propane Oven']].sum(axis=1)
+    # Calculate the total annual non-electric energy use for the different end-uses
+
+    if sector.value == 'Resstock':
+        appliance_name = ["Space Heater", "Water Heater", "Clothes Dryer", "Oven"]
+        eu1 = df[['Fuel Oil Heating', 'Natural Gas Heating', 'Propane Heating']].sum(axis=1)
+        eu2 = df[['Fuel Oil Hot Water','Natural Gas Hot Water','Propane Hot Water']].sum(axis=1)
+        eu3 = df[['Natural Gas Clothes Dryer', 'Propane Clothes Dryer']].sum(axis=1)
+        eu4 = df[['Natural Gas Oven', 'Propane Oven']].sum(axis=1)
+
+    elif sector.value == 'Comstock':
+        appliance_name = ["Space Heater", "Water Heater", "Cooling", "Interior Equipment"]
+        eu1 = df[['Other Fuel Heating', 'Natural Gas Heating']].sum(axis=1)
+        eu2 = df[['Other Fuel Water Heating', 'Natural Gas Water Heating']].sum(axis=1)
+        eu3 = df[['Other Fuel Cooling', 'Natural Gas Cooling']].sum(axis=1)
+        eu4 = df[['Other Fuel Interior Equipment', 'Natural Gas Interior Equipment']].sum(axis=1)
+
     #----------------------------------------------------------------------------#
-    appliance = [resstock_heating, resstock_water_heating, resstock_clothes_dryer, resstock_oven]
-    return (
-        appliance,
-        resstock_clothes_dryer,
-        resstock_heating,
-        resstock_oven,
-        resstock_water_heating,
-    )
+    appliance = [eu1, eu2, eu3, eu4]
+    return appliance, appliance_name, eu1, eu2, eu3, eu4
 
 
 @app.cell
 def __(
     appliance,
-    checkbox_dryer,
-    checkbox_heater,
-    checkbox_oven,
-    checkbox_water,
-    clothes_AR,
-    clothes_year,
-    cooking_AR,
-    cooking_year,
-    dt,
-    heater_AR,
-    heater_year,
+    appliance_name,
+    checkbox_eu1,
+    checkbox_eu2,
+    checkbox_eu3,
+    checkbox_eu4,
+    data_model_year,
+    eu1_AR,
+    eu1_year,
+    eu2_AR,
+    eu2_year,
+    eu3_AR,
+    eu3_year,
+    eu4_AR,
+    eu4_year,
     np,
     plt,
+    start_year,
     target_year,
-    water_AR,
-    water_year,
 ):
     #
     # Figure 1 - Electrification potential
@@ -407,43 +420,51 @@ def __(
 
     def sigmoid(x, L, k, x0):
         return L / (1 + np.exp(-k*(x-x0)))
+        
+    # Generate x values
+    x = np.linspace(start_year.value, target_year.value, 100)
+    new_sup = np.zeros((len(x), 4))
 
-    initial_year = dt.datetime.now().year
-    new_sup = np.zeros((100,4))
-    final_val = np.zeros((100,4))
-    X0 = [heater_year.value, water_year.value, clothes_year.value, cooking_year.value]
-    K = [heater_AR.value, water_AR.value, clothes_AR.value, cooking_AR.value]
+    X0 = [eu1_year.value, eu2_year.value, eu3_year.value, eu4_year.value]
+    K = [eu1_AR.value, eu2_AR.value, eu3_AR.value, eu4_AR.value]
+
     # applying arithmetic or geometric growth rate to achieve electrification
     for i in range(len(appliance)):
         # Initial and target value
         initial_value = appliance[i].sum()
-        target_value = 1
 
         # Calculate parameters
-        L = target_value - initial_value
         x0 = X0[i]
         k = K[i]/100  # adjust this to suit your needs
 
-        # Generate x values
-        x = np.linspace(initial_year, target_year.value, 100)
-
         new_sup[:,i] = sigmoid(x, 1, k, x0)
-        new_sup[:,i] = (new_sup[:,i] - min(new_sup[:,i])) / (max(new_sup[:,i]) - min(new_sup[:,i])) * initial_value
+        new_sup[:,i] = (new_sup[:,i] - min(new_sup[:,i])) / (max(new_sup[:,i]) - min(new_sup[:,i])) 
+
+        # If data_model_year > start_year, backpropagate data by appropriate growth amount to start at zero electrification at start_year
+        if data_model_year > start_year.value and data_model_year in x:
+            # Find growth amount at model year
+            model_year_idx = list(x).index(data_model_year)
+            model_year_supply_growth = new_sup[model_year_idx]
+            # Adjust what appliance initial consumption is by the growth at model year
+            initial_value /= model_year_supply_growth
+
+        # Get new supply
+        new_sup[:,i] = new_sup[:,i] * initial_value
 
     plt.figure(figsize=(7,5))
 
-    if checkbox_heater.value == True:
-        plt.plot(x, new_sup[:,0]/1e9, color='tab:blue', label = 'Space heater')
-        plt.axvline(x=X0[0],ls=':', color='tab:blue', label='Peak adoption year - space heater')
-    if checkbox_water.value == True:
-        plt.plot(x, new_sup[:,1]/1e9, color='tab:orange', label = 'Water heater')
-        plt.axvline(x=X0[1], ls=':', color='tab:orange', label='Peak adoption year - water heater')
-    if checkbox_dryer.value == True:
-        plt.plot(x, new_sup[:,2]/1e9, color='tab:green', label = 'Clothes dryer')
-        plt.axvline(x=X0[2], ls=':', color='tab:green', label='Peak adoption year - clothes dryer')
-    if checkbox_oven.value == True:
-        plt.plot(x, new_sup[:,3]/1e9,color='tab:red', label = 'Oven')
-        plt.axvline(x=X0[3], ls=':', color='tab:red', label='Peak adoption year - oven')
+    if checkbox_eu1.value == True:
+        plt.plot(x, new_sup[:,0]/1e9, color='tab:blue', label = f'{appliance_name[0]}')
+        plt.axvline(x=X0[0],ls=':', color='tab:blue', label= f'Peak adoption year - {appliance_name[0]}')
+    if checkbox_eu2.value == True:
+        plt.plot(x, new_sup[:,1]/1e9, color='tab:orange', label = f'{appliance_name[1]}')
+        plt.axvline(x=X0[1], ls=':', color='tab:orange', label= f'Peak adoption year - {appliance_name[1]}')
+    if checkbox_eu3.value == True:
+        plt.plot(x, new_sup[:,2]/1e9, color='tab:green', label = f'{appliance_name[2]}')
+        plt.axvline(x=X0[2], ls=':', color='tab:green', label= f'Peak adoption year - {appliance_name[2]}')
+    if checkbox_eu4.value == True:
+        plt.plot(x, new_sup[:,3]/1e9,color='tab:red', label = f'{appliance_name[3]}')
+        plt.axvline(x=X0[3], ls=':', color='tab:red', label= f'Peak adoption year - {appliance_name[3]}')
 
 
     # plt.axvline(x=X0[0], color='b', ls=':', label='Peak Adoption Year')
@@ -455,17 +476,15 @@ def __(
     fig1 = plt.gca()
     return (
         K,
-        L,
         X0,
         fig1,
-        final_val,
         i,
         initial_value,
-        initial_year,
         k,
+        model_year_idx,
+        model_year_supply_growth,
         new_sup,
         sigmoid,
-        target_value,
         x,
         x0,
     )
@@ -476,11 +495,11 @@ def __(mo):
     #
     # Checkboxes for Figure 1
     #
-    checkbox_heater = mo.ui.checkbox(True)
-    checkbox_water = mo.ui.checkbox(False)
-    checkbox_dryer = mo.ui.checkbox(False)
-    checkbox_oven = mo.ui.checkbox(False)
-    return checkbox_dryer, checkbox_heater, checkbox_oven, checkbox_water
+    checkbox_eu1 = mo.ui.checkbox(True)
+    checkbox_eu2 = mo.ui.checkbox(False)
+    checkbox_eu3 = mo.ui.checkbox(False)
+    checkbox_eu4 = mo.ui.checkbox(False)
+    return checkbox_eu1, checkbox_eu2, checkbox_eu3, checkbox_eu4
 
 
 @app.cell
@@ -488,26 +507,34 @@ def __(
     K,
     X0,
     appliance,
+    data_model_year,
     df,
     elec_col,
-    initial_year,
     np,
     sigmoid,
+    start_year,
     study_year,
     target_year,
 ):
     #
     # Calculation for the new supply for a given year
     #
-
     year = int(study_year.value)
+    x1 = np.arange(start_year.value, target_year.value + 1, 1)
 
-    # if study year is after target year, set it to target year
+    # If study year is after target year, set it to target year, fully electrified
     if year > target_year.value:
         year = target_year.value
+        year_idx = list(x1).index(target_year.value)
 
-    x1 = np.arange(initial_year, target_year.value + 1, 1)
-    year_idx = list(x1).index(year)
+    if year in list(x1):
+        year_idx = list(x1).index(year)
+        
+    elif year < list(x1)[0]:
+        # Electrification has not started yet
+        # Assume state is same as start year
+        year = list(x1)[0]
+        year_idx = 0
 
     new_sup_sum = []
 
@@ -516,6 +543,18 @@ def __(
         new_sup1 = sigmoid(x1, 1, K[ii]/100, X0[ii])
         # Normalize sigmoid from 0 to 1
         new_sup1 = (new_sup1 - min(new_sup1)) / (max(new_sup1) - min(new_sup1))
+
+        # If data_model_year > start_year, backpropagate data by appropriate growth amount to start at zero electrification at start_year
+        if data_model_year > start_year.value and data_model_year in x1:
+            # Find growth amount at model year
+            model_year_idx_calc = list(x1).index(data_model_year)
+            model_year_supply_growth_calc = new_sup1[model_year_idx_calc]
+            # Adjust what appliance initial consumption is by the growth at model year
+            ap /= model_year_supply_growth_calc
+
+        elif data_model_year > target_year.value: # not in range of years, ie model data is fully electrified 
+            raise("Not Implemented.")
+        
         # For a given study year, retrieve the corresponding index
         new_sup1 = new_sup1[year_idx] * ap
         new_sup_sum.append(new_sup1.values)
@@ -525,23 +564,28 @@ def __(
 
     df['New Supply'] = new_supply
     df['New Electricity Total'] = new_supply  + df[elec_col]
-
-    return ap, ii, new_sup1, new_sup_sum, new_supply, x1, year, year_idx
+    return (
+        ap,
+        ii,
+        model_year_idx_calc,
+        model_year_supply_growth_calc,
+        new_sup1,
+        new_sup_sum,
+        new_supply,
+        x1,
+        year,
+        year_idx,
+    )
 
 
 @app.cell
-def __(sector):
+def __():
     #
-    # Total electric calculation
+    # Total current electricity column key
     #
 
     elec_col = "Electricity Total"
-    if sector.value == 'Resstock':
-        non_elec_cols = ["Natural Gas Total", "Fuel Oil Total", "Propane Total"]
-    elif sector.value == 'Comstock':
-        non_elec_cols = ["Natural Gas Total", "District Heating Total",
-                         "District Cooling Total", "Other Fuel Total"]
-    return elec_col, non_elec_cols
+    return elec_col,
 
 
 @app.cell
@@ -577,7 +621,7 @@ def __(
 
     df_agg['hour'] = pd.date_range("00:00", "23:45", freq="1H").hour
     # df_agg['minute'] = pd.date_range("00:00", "23:45", freq="1").minute
-    df_agg["Load Growth"] = (df_agg["New Supply"]/df_agg[elec_col]).values
+    df_agg['Load Growth'] = (df_agg['New Supply']/df_agg[elec_col]).values
 
     t = np.linspace(0,24,len(df_agg))
 
@@ -608,7 +652,6 @@ def __(
         on_click=lambda save_data: save_data.save_csv(),
         label="Save to CSV",
     )
-
     return (
         SaveData,
         df_agg,
@@ -664,8 +707,7 @@ def __(BUILDING_TYPES, CLIMATE_ZONES, CLIMATE_ZONES_IECC, HOME_TYPES, mo):
 
     climate_zone = mo.ui.dropdown(CLIMATE_ZONES, value = CLIMATE_ZONES[0])
     climate_zone_iecc = mo.ui.dropdown(CLIMATE_ZONES_IECC, value = CLIMATE_ZONES_IECC[0])
-    sector =  mo.ui.dropdown(['Resstock'], # ['Resstock', 'Comstock'] disabled comstock for now because it doesn't work
-                             value = 'Resstock')
+    sector =  mo.ui.dropdown(['Resstock', 'Comstock'], value = 'Resstock')
     building_type = mo.ui.dropdown(BUILDING_TYPES, value = BUILDING_TYPES[1])
     home_type =  mo.ui.dropdown(HOME_TYPES, value = HOME_TYPES[1])
     states = [ 'AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
@@ -695,41 +737,45 @@ def __(mo):
     #
     # Dropdown for electrification stuff
     #
-
-    target_year = mo.ui.slider(2023,2080, value=2045)
-
-    return target_year,
-
-
-@app.cell
-def __(dt, target_year):
-    targ_year = target_year.value
-    curr_year = dt.datetime.now().year
-    return curr_year, targ_year
+    # What is the target year set for the state
+    target_year = mo.ui.slider(2023, 2080, value=2045)
+    #start_year = mo.ui.slider(2000, 2080, value=2023)
+    data_model_year = 2018 # This is NOT a user setting. This is model specific, and for Restock and Comstock data used it's 2018.
+    return data_model_year, target_year
 
 
 @app.cell
-def __(curr_year, mo, targ_year):
-    heater_year = mo.ui.number(2000,2100, value=int((targ_year + curr_year)/2))
-    water_year = mo.ui.number(2000,2100, value=int((targ_year + curr_year)/2))
-    clothes_year = mo.ui.number(2000,2100, value=int((targ_year + curr_year)/2))
-    cooking_year = mo.ui.number(2000,2100, value=int((targ_year + curr_year)/2))
+def __(mo, target_year):
+    # When did electrification measures begin in the state
+    start_year = mo.ui.slider(2000, target_year.value-1, value=2023)
+    return start_year,
+
+
+@app.cell
+def __(mo, start_year, target_year):
+    # End-uses/appliances target years
+    # Resstock: space heater, water heater, clothes dryer, cooking
+    # Comstock: space heater, water heater, cooling, interior equipment
+    eu1_year = mo.ui.number(2000,2100, value=int((target_year.value + start_year.value)/2))
+    eu2_year = mo.ui.number(2000,2100, value=int((target_year.value + start_year.value)/2))
+    eu3_year = mo.ui.number(2000,2100, value=int((target_year.value + start_year.value)/2))
+    eu4_year = mo.ui.number(2000,2100, value=int((target_year.value + start_year.value)/2))
 
     AR_options = dict(start=5,stop=100,step=5,value=50)
-    heater_AR = mo.ui.number(**AR_options)
-    water_AR = mo.ui.number(**AR_options)
-    clothes_AR = mo.ui.number(**AR_options)
-    cooking_AR = mo.ui.number(**AR_options)
+    eu1_AR = mo.ui.number(**AR_options)
+    eu2_AR = mo.ui.number(**AR_options)
+    eu3_AR = mo.ui.number(**AR_options)
+    eu4_AR = mo.ui.number(**AR_options)
     return (
         AR_options,
-        clothes_AR,
-        clothes_year,
-        cooking_AR,
-        cooking_year,
-        heater_AR,
-        heater_year,
-        water_AR,
-        water_year,
+        eu1_AR,
+        eu1_year,
+        eu2_AR,
+        eu2_year,
+        eu3_AR,
+        eu3_year,
+        eu4_AR,
+        eu4_year,
     )
 
 
@@ -746,7 +792,6 @@ def __(mo):
     season = mo.ui.dropdown(['winter', 'spring', 'summer', 'fall'], value = 'winter')
     view_month = mo.ui.dropdown(['by month', 'by season', 'all-year'], value = 'by month')
     day_type = mo.ui.dropdown(['weekday', 'weekend'])
-    # aggregation = mo.ui.dropdown(['avg', 'sum', 'peak_day'], value = 'avg')
     aggregation = mo.ui.dropdown(['avg', 'sum'], value = 'avg')
     return (
         aggregation,
@@ -760,8 +805,8 @@ def __(mo):
 
 
 @app.cell
-def __(initial_year, mo, target_year):
-    study_year = mo.ui.slider(initial_year, target_year.value)
+def __(mo, start_year, target_year):
+    study_year = mo.ui.slider(start_year.value, target_year.value)
     return study_year,
 
 
@@ -838,7 +883,7 @@ def __(df_agg, plt, t):
     plt.plot(t, df_agg['Electricity Total']/1e3 *(60/15), label = 'Current Loadshape')
     plt.plot(t, df_agg['New Electricity Total']/1e3 *(60/15),
              label = 'Loadshape with Electrification')
-    plt.ylim(bottom=0)
+    #plt.ylim(bottom=0)
     plt.xlabel('Hour (hr)')
     plt.ylabel('Power demand (MW)')
     plt.xticks([0,6,12,18,24])
