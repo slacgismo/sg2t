@@ -1,17 +1,5 @@
-# Loadshape forecasting using Marimo
+# North American Electrification Loadshape Forecasting
 
-This notebook requires the use of Marimo. See https://github.com/marimo-team/marimo for installation and operations details.
+See the [EFInsight repository](https://github.com/slacgismo/efinsight) for the North American Electrification Loadshape Forecasting tool. 
 
-## Setup
-
-~~~
-python3 -m venv .
-. bin/activate
-python3 -m pip install ../..
-~~~
-
-## Run
-
-~~~
-marimo run loadshape_nrel_marimo.py
-~~~
+The tool is deployed on marimo cloud and can be found [here](https://marimo.io/@gismo/na-electrification-loadshape-forecasting).
