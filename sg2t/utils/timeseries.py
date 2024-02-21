@@ -108,7 +108,7 @@ class Timeseries():
 
         # Set datetime as the index
         df_aggregated.set_index('datetime', inplace=True)
-        df_resampled = df_aggregated.resample('H').mean()
+        df_resampled = df_aggregated.resample('h').mean()
         df_resampled = df_resampled.drop(['hour', 'minute'], axis=1)
         return df_resampled.reset_index(drop=True)
 
