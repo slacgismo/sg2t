@@ -2,7 +2,7 @@
 import datetime
 import pandas as pd
 
-class Timeseries():
+class Timeseries:
     def __init__(self, data):
         self.data = data
         self.daytypes = ["weekday", "weekend"]
