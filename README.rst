@@ -24,3 +24,8 @@ License
 -------
 
 This project is licensed under the terms of the BSD 3-Clause license.
+
+Acknowledgment
+--------------
+
+This work was funded by the US Department of Energy's Advanced Grid Modeling Program and conducted at SLAC National Accelerator Laboratory's Grid Integration Systems and Mobility group. SLAC is operated by Stanford University for the US Department of Energy under Contract DE-AC02-76SF00515.
