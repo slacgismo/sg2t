@@ -99,6 +99,25 @@ class API():
 
         return df
 
+    def get_metadata(self, sector):
+        filename = "metadata/metadata.parquet"
+
+        url = self.paths_amy_2018_v1["end_use_loads"] + \
+              self.paths_amy_2018_v1[sector] + \
+              f"{filename}"
+
+        try:
+            df = pd.read_parquet(url)
+        except Exception as err:
+            raise Exception(f"{err} (URL='{url}')")
+
+        # Only using these cols for now
+        if sector.capitalize() == "Resstock":
+            df = df[["in.county","in.geometry_building_type_recs","in.sqft"]]
+        if sector.capitalize() == "Comstock":
+            df = df[["in.county","in.building_type","in.sqft"]]
+        return df
+
     def get_county_gisjoin_name(self, county_name=None, county_gisjoin=None):
         if county_name:
             return self.df_geoinfo[self.df_geoinfo["county_name"] == county_name.capitalize()].index[0]
