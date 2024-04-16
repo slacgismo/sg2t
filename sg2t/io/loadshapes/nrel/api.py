@@ -5,9 +5,6 @@ https://data.openei.org/s3_viewer?bucket=oedi-data-lake
 """
 
 import io
-import boto3
-from botocore import UNSIGNED
-from botocore.client import Config
 import pandas as pd
 
 from sg2t.config import load_config
@@ -38,8 +35,11 @@ class API():
             "end_use_loads": "https://oedi-data-lake.s3.amazonaws.com/"
                              "nrel-pds-building-stock/" \
                              "end-use-load-profiles-for-us-building-stock/",
-            "resstock": "2022/resstock_amy2018_release_1/",
-            "comstock": "2023/comstock_amy2018_release_1/"
+            # 4/16/24 API breaking changes:
+            # 2021 release has county breakdown
+            # 2021 release does *not* take upgrades as input
+            "resstock": "2021/resstock_amy2018_release_1/",
+            "comstock": "2021/comstock_amy2018_release_1/"
         }
         # Climate zones
         self.climate_zones = ("cold", "hot-dry", "hot-humid", "marine", "mixed-dry",
@@ -52,6 +52,8 @@ class API():
         # For residential homes
         self.home_types = ("mobile_home", "single-family_detached", "single-family_attached",
                              "multi-family_with_2_-_4_units", "multi-family_with_5plus_units")
+        # Geographic information
+        self.df_geoinfo = self.get_geoinfo()
 
 
     def load_config(self, config_name=None, key=None):
@@ -72,6 +74,36 @@ class API():
             Configuration dict, if any, otherwise None.
         """
         return load_config(config_name, key)
+
+    def get_geoinfo(self):
+        # This file is identical between ResStock and Comstock
+        sector = "resstock"
+
+        filename = f"spatial_tract_lookup_table.csv"
+        spatial_tract_lookup_table = f"geographic_information/" \
+                                       f"{filename}"
+
+        url = self.paths_amy_2018_v1["end_use_loads"] + \
+              self.paths_amy_2018_v1[sector] + \
+              spatial_tract_lookup_table
+        try:
+            df = pd.read_csv(url, index_col=1) # nhgis_county_gisjoin as index
+        except Exception as err:
+            raise Exception(f"{err} (URL='{url}')")
+
+        # Get county names
+        df = df[df[f"{sector}_county_id"].str.contains("Not Applicable") == False]
+        county_names = [x.split(" ")[1:-1] if x.split(" ")[-1]=="County" else x.split(" ")[1:] for x in df[f"{sector}_county_id"]]
+        county_names = [" ".join(x) for x in county_names]
+        df["county_name"] = county_names
+
+        return df
+
+    def get_county_gisjoin_name(self, county_name=None, county_gisjoin=None):
+        if county_name:
+            return self.df_geoinfo[self.df_geoinfo["county_name"] == county_name.capitalize()].index[0]
+        elif county_gisjoin:
+            return self.df_geoinfo.iloc[self.df_geoinfo.index  == county_gisjoin.capitalize()]["county_name"].values[0]
 
     # TODO: validate that options exist in class attribute sets
     def get_data_resstock_by_climatezone(self, climate, home_type, upgrade=0):
@@ -140,6 +172,30 @@ class API():
         df.index = pd.to_datetime(df.index)
         return df
 
+    def get_data_resstock_by_county(self, state, county_gisjoin, county_name,
+                                    home_type):
+        """Pulls CSV"""
+        state = state.upper()
+        if not county_gisjoin and county_name:
+            county_gisjoin = county
+
+        filename = f"{county_gisjoin}-{home_type}.csv"
+        timeseries_aggregate_state = f"timeseries_aggregates/" \
+                                     f"by_county" \
+                                     f"state={state}/" \
+                                     f"{filename}"
+
+
+        url =  self.paths_amy_2018_v1["end_use_loads"] +\
+               self.paths_amy_2018_v1["resstock"] + \
+               timeseries_aggregate_state
+        try:
+            df = pd.read_csv(url, index_col=2)
+        except Exception as err:
+            raise Exception(f"{err} (URL='{url}')")
+        df.index = pd.to_datetime(df.index)
+        return df
+
     # TODO: update comstock API calls (only state one is updated)
     def get_data_comstock_by_climatezone(self, climate, building_type, upgrade=0):
         """Pulls CSV"""
@@ -196,9 +252,4 @@ class API():
         df.index = pd.to_datetime(df.index)
         return df
 
-api = API()
-df = api.get_data_resstock_by_state(state='CA', home_type='single-family_detached')
 
-from sg2t.utils.timeseries import Timeseries
-
-df_agg = Timeseries.timeseries_aggregate(df, aggregation='avg', month_start=1, month_end=2)
