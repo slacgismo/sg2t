@@ -93,7 +93,7 @@ class API():
 
         # Get county names
         df = df[df[f"{sector}_county_id"].str.contains("Not Applicable") == False]
-        county_names = [x.split(" ")[1:-1] if x.split(" ")[-1]=="County" else x.split(" ")[1:] for x in df[f"{sector}_county_id"]]
+        county_names = [x.split(" ")[1:-1] if x.endswith("County") else x.split(" ")[1:] for x in df[f"{sector}_county_id"]]
         county_names = [" ".join(x) for x in county_names]
         df["county_name"] = county_names
 
@@ -116,6 +116,24 @@ class API():
             df = df[["in.county","in.geometry_building_type_recs","in.sqft"]]
         if sector.capitalize() == "Comstock":
             df = df[["in.county","in.building_type","in.sqft"]]
+        return df
+
+    def get_weather(self, county_gisjoin):
+        # This file is identical between ResStock and Comstock
+        # TODO double check this
+        sector = "resstock"
+        filename = f"{county_gisjoin.upper()}_2018.csv"
+
+        url = self.paths_amy_2018_v1["end_use_loads"] + \
+              self.paths_amy_2018_v1[sector] + \
+              "weather/amy2018/" + \
+              f"{filename}"
+
+        try:
+            df = pd.read_csv(url, index_col = ["date_time"])
+        except Exception as err:
+            raise Exception(f"{err} (URL='{url}')")
+
         return df
 
     def get_county_gisjoin_name(self, county_name=None, county_gisjoin=None):
@@ -279,7 +297,6 @@ class API():
                                      f"by_county/" \
                                      f"state={state.upper()}/" \
                                      f"{filename}"
-
 
         url =  self.paths_amy_2018_v1["end_use_loads"] +\
                self.paths_amy_2018_v1["comstock"] + \
