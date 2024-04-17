@@ -191,23 +191,21 @@ class API():
         df.index = pd.to_datetime(df.index)
         return df
 
-    def get_data_resstock_by_county(self, state, county_gisjoin, county_name,
-                                    home_type):
+    def get_data_resstock_by_county(self, state, county_gisjoin, home_type, county_name=None):
         """Pulls CSV"""
-        state = state.upper()
         if not county_gisjoin and county_name:
-            county_gisjoin = county
+            county_gisjoin = self.get_county_gisjoin_name(county_name=county_name)
 
-        filename = f"{county_gisjoin}-{home_type}.csv"
-        timeseries_aggregate_state = f"timeseries_aggregates/" \
-                                     f"by_county" \
-                                     f"state={state}/" \
+        filename = f"{county_gisjoin.lower()}-{home_type.lower()}.csv"
+        timeseries_aggregate_county = f"timeseries_aggregates/" \
+                                     f"by_county/" \
+                                     f"state={state.upper()}/" \
                                      f"{filename}"
 
 
         url =  self.paths_amy_2018_v1["end_use_loads"] +\
                self.paths_amy_2018_v1["resstock"] + \
-               timeseries_aggregate_state
+               timeseries_aggregate_county
         try:
             df = pd.read_csv(url, index_col=2)
         except Exception as err:
@@ -268,6 +266,28 @@ class API():
                self.paths_amy_2018_v1["comstock"] + \
                timeseries_aggregate_state
         df = pd.read_csv(url, index_col=3)
+        df.index = pd.to_datetime(df.index)
+        return df
+
+    def get_data_comstock_by_county(self, state, county_gisjoin, building_type, county_name=None):
+        """Pulls CSV"""
+        if not county_gisjoin and county_name:
+            county_gisjoin = self.get_county_gisjoin_name(county_name=county_name)
+
+        filename = f"{county_gisjoin.lower()}-{building_type.lower()}.csv"
+        timeseries_aggregate_county = f"timeseries_aggregates/" \
+                                     f"by_county/" \
+                                     f"state={state.upper()}/" \
+                                     f"{filename}"
+
+
+        url =  self.paths_amy_2018_v1["end_use_loads"] +\
+               self.paths_amy_2018_v1["comstock"] + \
+               timeseries_aggregate_county
+        try:
+            df = pd.read_csv(url, index_col=2)
+        except Exception as err:
+            raise Exception(f"{err} (URL='{url}')")
         df.index = pd.to_datetime(df.index)
         return df
 
