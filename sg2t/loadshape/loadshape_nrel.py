@@ -29,7 +29,7 @@ class LoadshapeNrel:
             default is set to None which doesn't do any daytype filtering
 
         """         
-        self.nrel_api = API()
+        self.nrel_api = API() # TODO: use dependency injection instead
         self.aggregation = aggregation
         self.month_start = month_start
         self.month_end = month_end
