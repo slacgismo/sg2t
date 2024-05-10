@@ -47,25 +47,27 @@ class BuildStock(IOBase):
             Full path to JSON file containing the metadata for this
              type of data.
         """
-        super().__init__(config_name, config_key, metadata_file)
+        # TODO: drop base class?
+        # super().__init__(config_name, config_key, metadata_file)
         self.raw_data = data
         self.api = api
         self.filename = filename
         self.kwargs = kwargs
-        self.weather_gisjoint = self.load_weather_location()
-        self.sector = "resstock"
+        # self.weather_gisjoint = self.load_weather_location()
+        self.data = None
+        self.data_normalized = None
 
-    def load_weather_location(self):
-        # TODO: check that metadata exists
-        if not self.metadata:
-            return "None"
-        try:
-            gisj_metadata = self.metadata["file"]["GISJOINT ID"]
-            return gisj_metadata
-        except KeyError:
-            return "None"
+    # def load_weather_location(self):
+    #     # TODO: check that metadata exists
+    #     if not self.metadata:
+    #         return "None"
+    #     try:
+    #         gisj_metadata = self.metadata["file"]["GISJOINT ID"]
+    #         return gisj_metadata
+    #     except KeyError:
+    #         return "None"
 
-    def get_data(self):
+    def get_data(self, kwargs=self.kwargs):
         """Import raw ResStock data in DataFrame format.
 
         PARAMETERS
@@ -83,7 +85,7 @@ class BuildStock(IOBase):
         if self.raw_data:
             # Read in raw data
             self.raw_data = pd.DataFrame(dataframe)
-            self.data = self.raw_data.reset_index()
+            self.data = self.raw_data.reset_index().copy()
             # self.bldg_id = None
             # self.metadata["file"]["Building ID"] = self.bldg_id
 
@@ -154,106 +156,109 @@ class BuildStock(IOBase):
 
         return self.data
 
-    def normalize_by_sqft(self, sector, county, state):
+    def normalize_by_sqft(self):
         """ Normalize county-level data by square footage
         and return energy/SF for each building type
         """
+        if not (self.kwargs["sector"] and self.kwargs["county"] and self.kwargs["state"]):
+            raise "Must have sector, state and county specified to call this method."
+
         # TODO: why does this take 17s?
         # get SF per build type
-        meta = self.api.get_metadata(sector)
+        meta = self.api.get_metadata(self.kwargs["sector"])
         area = meta.groupby(["county", "building_type"]).sum()
         area.columns = ["floor_area[sf]"]
         area.reset_index(inplace=True)
 
         # get county puma
-        puma = self.api.get_county_gisjoin_name(county, state)
+        puma = self.api.get_county_gisjoin_name(self.kwargs["county"], self.kwargs["state"])
 
         # sort SF by county and building type
         area = area[area["county"] == puma] # TODO: do i need to do this or is it always one county?
         area.set_index(["county", "building_type"], inplace=True)
 
         # join data with SF metadata
-        self.data.reset_index(inplace=True)
-        self.data.set_index(["county", "building_type"], inplace=True)
-        data = self.data.join(area)
+        self.data_normalized = self.data.copy()
+        self.data_normalized.reset_index(inplace=True)
+        self.data_normalized.set_index(["county", "building_type"], inplace=True)
+        self.data_normalized = self.data_normalized.join(area)
 
         dt = 0.25 # this shouldn't change for ResStock and ComStock, TODO: confirm this
         columns = []
-        for column in data.columns:
+        for column in self.data_normalized.columns:
             if column.endswith("consumption"):
-                data[column] = data[column] / data["floor_area[sf]"] / dt
+                self.data_normalized[column] = self.data_normalized[column] / self.data_normalized["floor_area[sf]"] / dt
             columns.append(column.replace("consumption", "consumption[kW/sf]"))
 
-        data.columns = columns
-        data.drop("floor_area[sf]", axis=1, inplace=True)
-        data.reset_index(inplace=True)
-        data.set_index(["county", "building_type", "timestamp"], inplace=True)
-        data.sort_index(inplace=True)
-        self.data = data
+        self.data_normalized.columns = columns
+        self.data_normalized.drop("floor_area[sf]", axis=1, inplace=True)
+        self.data_normalized.reset_index(inplace=True)
+        self.data_normalized.set_index("timestamp", inplace=True)
+        self.data_normalized.sort_index(inplace=True)
 
-        return self.data
+        return self.data_normalized
 
-    def export_data(self,
-                columns=None,
-                save_to_file=True,
-                type="CSV",
-                filename=None):
-        """Export data from pd.Daframe into a CSV file or into
-        sg2t formatted DataFrame to pass onto sg2t opps.
-        If saving to file, the file will be saved in the cache which
-        can be accessed through os.environ["SG2T_CACHE"].
-        PARAMETERS
-        ----------
-        columns : list of str
-            List of columns to save/export from DataFrame.
-
-        type : str
-            Type of file to save data as. Currently only supports CSV.
-
-        filename : str
-            Name of output file. It will append a timestamp to that.
-
-        RETURNS
-        -------
-        out : str
-            Out filename and json metadata filename.
-        """
-        filename = f"resstock"
-
-        return self._export(columns=columns, filename=filename)
-
-    def _units(self, key):
-        """Method to get the unit corresponding to column
-        from old mapping.
-
-        PARAMETERS
-        ----------
-        key : str
-            Column name.
-
-        RETURNS
-        -------
-        unit : str
-            String of unit.
-        """
-        data_key = self.keys_map[key]
-        return self.metadata["col_units"][data_key]
-
-    def units(self, key):
-        """Method to get the unit corresponding to column
-        from new mapping.
-
-        PARAMETERS
-        ----------
-        key : str
-            Column name.
-
-        RETURNS
-        -------
-        unit : str
-            String of unit.
-        """
-        return self.metadata["col_units"][key]
+    # def export_data(self,
+    #             columns=None,
+    #             save_to_file=True,
+    #             type="CSV",
+    #             filename=None):
+    #     """Export data from pd.Daframe into a CSV file or into
+    #     sg2t formatted DataFrame to pass onto sg2t opps.
+    #     If saving to file, the file will be saved in the cache which
+    #     can be accessed through os.environ["SG2T_CACHE"].
+    #     PARAMETERS
+    #     ----------
+    #     columns : list of str
+    #         List of columns to save/export from DataFrame.
+    #
+    #     type : str
+    #         Type of file to save data as. Currently only supports CSV.
+    #
+    #     filename : str
+    #         Name of output file. It will append a timestamp to that.
+    #
+    #     RETURNS
+    #     -------
+    #     out : str
+    #         Out filename and json metadata filename.
+    #     """
+    #     filename = f"resstock"
+    #
+    #     return self._export(columns=columns, filename=filename)
+    #
+    # def _units(self, key):
+    #     """Method to get the unit corresponding to column
+    #     from old mapping.
+    #
+    #     PARAMETERS
+    #     ----------
+    #     key : str
+    #         Column name.
+    #
+    #     RETURNS
+    #     -------
+    #     unit : str
+    #         String of unit.
+    #     """
+    #     data_key = self.keys_map[key]
+    #     return self.metadata["col_units"][data_key]
+    #
+    # def units(self, key):
+    #     """Method to get the unit corresponding to column
+    #     from new mapping.
+    #
+    #     PARAMETERS
+    #     ----------
+    #     key : str
+    #         Column name.
+    #
+    #     RETURNS
+    #     -------
+    #     unit : str
+    #         String of unit.
+    #     """
+    #     return self.metadata["col_units"][key]
 
 
 class API:
@@ -320,6 +325,11 @@ class API:
 
     def get_data(self, sector, building_type, state=None, county=None, climate=None):
         sector = sector.lower()
+
+        if (state and climate) or (county and climate):
+            # if state and county then county level is taken
+            raise "Please specify the query type (state, state/county, or climate)."
+
         # Get dataframe
         if state:
             if county:
@@ -380,6 +390,8 @@ class API:
         return df
 
     def get_metadata(self, sector):
+        sector = sector.lower()
+
         filename = "metadata/metadata.parquet"
 
         url = self.paths_amy_2018_v1["end_use_loads"] + \
