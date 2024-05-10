@@ -13,10 +13,6 @@ project = 'slac-gismo-grid-tools'
 copyright = '2022, Sara Miskovich'
 author = 'Sara Miskovich'
 
-# The full version, including alpha/beta/rc tags
-from sg2t import __version__
-release = __version__
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be

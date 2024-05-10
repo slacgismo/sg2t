@@ -8,7 +8,7 @@ prune .circleci
 prune .github
 prune .jupyter
 prune binder
-# exclude a bunch of common hidden files, you probably want to add your own here
+# exclude a bunch of common hidden files
 exclude .mailmap
 exclude .gitignore
 exclude .gitattributes
