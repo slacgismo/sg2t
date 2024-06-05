@@ -12,7 +12,7 @@ jobs:
     environment: test
     concurrency:
       group: unit_tests
-      cancel-in-progress: true
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     strategy:
       fail-fast: false
       matrix:
