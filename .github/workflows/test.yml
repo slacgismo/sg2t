@@ -10,6 +10,9 @@ jobs:
   run-tests:
     runs-on: ubuntu-latest
     environment: test
+    concurrency:
+      group: unit_tests
+      cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:
