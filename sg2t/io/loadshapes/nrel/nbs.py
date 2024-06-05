@@ -24,13 +24,11 @@ class BuildStock(IOBase):
      dataset into sg2t tools.
     """
     def __init__(self,
-                 data=None, # TODO: update docstrings
+                 data, # TODO: update docstrings
+                 metadata,  # TODO: implement or remove
                  api=None,
-                 filename=None,
                  config_name="config.ini", # TODO: implement or remove
                  config_key="io.nrel.api", # TODO: implement or remove
-                 metadata_file=None, # TODO: implement or remove
-                 **kwargs
                  ):
         """ ResStock object initialization.
 
@@ -50,12 +48,13 @@ class BuildStock(IOBase):
         # TODO: drop base class?
         # super().__init__(config_name, config_key, metadata_file)
         self.raw_data = data
-        self.api = api
-        self.filename = filename
-        self.kwargs = kwargs
+        # self.kwargs = kwargs
         # self.weather_gisjoint = self.load_weather_location()
-        self.data = None
+        self.data = self._format_data()
         self.data_normalized = None
+        self.metadata = metadata
+        self.api = api
+        self.validate_metadata()
 
     # def load_weather_location(self):
     #     # TODO: check that metadata exists
@@ -67,60 +66,18 @@ class BuildStock(IOBase):
     #     except KeyError:
     #         return "None"
 
-    def get_data(self, kwargs=self.kwargs):
-        """Import raw ResStock data in DataFrame format.
-
-        PARAMETERS
-        ----------
-        filename : str
-            Filename, as "ST_bldg_000000-0.parquet".
-
-        RETURNS
-        -------
-        out : pd.DataFrame
-            DataFrame of data.
-        """
-        # TODO: adds docs about options/kwargs for api
-
-        if self.raw_data:
-            # Read in raw data
-            self.raw_data = pd.DataFrame(dataframe)
-            self.data = self.raw_data.reset_index().copy()
-            # self.bldg_id = None
-            # self.metadata["file"]["Building ID"] = self.bldg_id
-
-        elif self.filename:
-            pass # TODO: implement read file (do i need this? or just pass df as raw_data?)
-            # if not os.path.exists(self.data_filename):
-            #     raise FileNotFoundError(f"File not found: {self.data_filename}")
-
-            # Add source filename to metadata
-            # self.metadata["file"]["filename"] = self.data_filename
-            #
-            # # Read in raw data
-            # self.data = pq.read_pandas(filename).to_pandas()
-            # self.bldg_id = self.data.index[0]
-            # self.metadata["file"]["Building ID"] = self.bldg_id
-
-        elif self.api:
-            self.data = self.api.get_data(**self.kwargs)
-
-        else:
-            raise "No data source provided. Could not pull data."
-
-        # Convert to standard format
-        self._format_data()
-        #
-        # # Add to metadata.json
-        # self.metadata["columns"] = self.keys_map
-        #
-        # # update col_units in metadata to use new keys
-        # cols_list = list(self.keys_map.keys())
-        # units_list = [self._units(key) for key in cols_list]
-        # iterable = zip(cols_list, units_list)
-        # self.metadata["col_units"] = {key: value for (key, value) in iterable}
-
-        return self.data
+    def validate_metadata(self):
+        # TODO: also check that there's no overlap? (e.g. both county and climate keys are there)
+        try:
+            assert "sector" in self.metadata
+            assert ("state" in self.metadata) or \
+                   ("state" in self.metadata and "county" in self.metadata ) or \
+                   ("climate" in self.metadata)
+        except AssertionError:
+            print("Please specify the sector in the metadata, and: \n \
+                  - the state, or \n \
+                  - the state and county, or \n \
+                  - the climate")
 
     def _format_data(self):
         """Changes the format of the loaded tmy3 data self.data to follow
@@ -141,6 +98,8 @@ class BuildStock(IOBase):
         #
         # self.data = data
 
+        self.data = self.raw_data.copy()
+
         # adjust col names to same standard between resstock and comstock
         self.data.rename(columns=
         {
@@ -160,18 +119,21 @@ class BuildStock(IOBase):
         """ Normalize county-level data by square footage
         and return energy/SF for each building type
         """
-        if not (self.kwargs["sector"] and self.kwargs["county"] and self.kwargs["state"]):
-            raise "Must have sector, state and county specified to call this method."
+        if "county" not in self.data.columns:
+            raise Exception("Must have county level data specified to call this method.")
+
+        # create API object # TODO: maybe change how this is implemented
+        self.api = self.api if self.api else API()
 
         # TODO: why does this take 17s?
         # get SF per build type
-        meta = self.api.get_metadata(self.kwargs["sector"])
+        meta = self.api.get_metadata(self.metadata["sector"])
         area = meta.groupby(["county", "building_type"]).sum()
         area.columns = ["floor_area[sf]"]
         area.reset_index(inplace=True)
 
         # get county puma
-        puma = self.api.get_county_gisjoin_name(self.kwargs["county"], self.kwargs["state"])
+        puma = self.api.get_county_gisjoin_name(self.metadata["county_name"], self.metadata["state"])
 
         # sort SF by county and building type
         area = area[area["county"] == puma] # TODO: do i need to do this or is it always one county?
@@ -306,43 +268,43 @@ class API:
         # Geographic information
         self.df_geoinfo = self.get_geoinfo()
 
-        # API options
-        self.api_options = {
-                    "resstock" :
-                        { "state" : self.get_data_resstock_by_state, # state, hometype
-                          "county" : self.get_data_resstock_by_county, # state, county, hometype
-                          "climate-ba" : self.get_data_resstock_by_climatezone,  # climate, hometype
-                          "climate-iecc" : self.get_data_resstock_by_climatezone_iecc, # climate, hometype
-                          },
+        # # API options
+        # self.api_options = {
+        #             "resstock" :
+        #                 { "state" : self.get_data_resstock_by_state, # state, hometype
+        #                   "county" : self.get_data_resstock_by_county, # state, county, hometype
+        #                   "climate-ba" : self.get_data_resstock_by_climatezone,  # climate, hometype
+        #                   "climate-iecc" : self.get_data_resstock_by_climatezone_iecc, # climate, hometype
+        #                   },
+        #
+        #             "comstock" :
+        #                 { "state" : self.get_data_comstock_by_state, # state, hometype
+        #                   "county" : self.get_data_comstock_by_county, # state, county, hometype
+        #                   "climate-ba" : self.get_data_comstock_by_climatezone,  # climate, hometype
+        #                   "climate-iecc" : self.get_data_comstock_by_climatezone_iecc, # climate, hometype
+        #                   },
+        #        }
 
-                    "comstock" :
-                        { "state" : self.get_data_comstock_by_state, # state, hometype
-                          "county" : self.get_data_comstock_by_county, # state, county, hometype
-                          "climate-ba" : self.get_data_comstock_by_climatezone,  # climate, hometype
-                          "climate-iecc" : self.get_data_comstock_by_climatezone_iecc, # climate, hometype
-                          },
-                }
-
-    def get_data(self, sector, building_type, state=None, county=None, climate=None):
-        sector = sector.lower()
-
-        if (state and climate) or (county and climate):
-            # if state and county then county level is taken
-            raise "Please specify the query type (state, state/county, or climate)."
-
-        # Get dataframe
-        if state:
-            if county:
-                return self.api_options[sector]["county"](state=state, county_name=county, building_type=building_type)
-            else:
-                return self.api_options[sector]["state"](state=state, building_type=building_type)
-        elif climate:
-            if climate in self.climate_zones_ba:
-                return self.api_options[sector]["climate-ba"](climate=climate, building_type=building_type)
-            elif climate in self.climate_zones_iecc:
-                return self.api_options[sector]["climate-iecc"](climate=climate, building_type=building_type)
-            else:
-                raise Exception("Invalid option. Please pass either state, county, or climate info.")
+    # def get_data(self, sector, building_type, state=None, county=None, climate=None):
+    #     sector = sector.lower()
+    #
+    #     if (state and climate) or (county and climate):
+    #         # if state and county then county level is taken
+    #         raise "Please specify the query type (state, state/county, or climate)."
+    #
+    #     # Get dataframe
+    #     if state:
+    #         if county:
+    #             return self.api_options[sector]["county"](state=state, county_name=county, building_type=building_type)
+    #         else:
+    #             return self.api_options[sector]["state"](state=state, building_type=building_type)
+    #     elif climate:
+    #         if climate in self.climate_zones_ba:
+    #             return self.api_options[sector]["climate-ba"](climate=climate, building_type=building_type)
+    #         elif climate in self.climate_zones_iecc:
+    #             return self.api_options[sector]["climate-iecc"](climate=climate, building_type=building_type)
+    #         else:
+    #             raise Exception("Invalid option. Please pass either state, county, or climate info.")
 
     def load_config(self, config_name=None, key=None):
         """Load configuration.
@@ -375,7 +337,7 @@ class API:
               self.paths_amy_2018_v1[sector] + \
               spatial_tract_lookup_table
         try:
-            df = pd.read_csv(url, index_col=1)  # nhgis_county_gisjoin as index
+            df = pd.read_csv(url, index_col=["nhgis_county_gisjoin"])
         except Exception as err:
             raise Exception(f"{err} (URL='{url}')")
 
@@ -426,7 +388,7 @@ class API:
 
     def get_weather(self, county_gisjoin):
         # This file is identical between ResStock and Comstock
-        # TODO double check this
+        # TODO double check the above
         sector = "resstock"
         filename = f"{county_gisjoin.upper()}_2018.csv"
 
@@ -458,61 +420,15 @@ class API:
             raise Exception("Must provide state and county name, or county GISJOIN.")
 
     # TODO: validate that options exist in class attribute sets
-    def get_data_resstock_by_climatezone(self, climate, building_type, upgrade=0):
-        """Pulls CSV"""
-        climate_zone = climate.title()
+    # TODO: set up cache
 
-        # for some reason "Very Cold" climate zone naming is set up differently
-        if climate == "very-cold":
-            climate = "very_cold"
-            climate_zone = "Very%20Cold"
-
-        # TODO: check if in cache, if not, pull from AWS
-        # TODO: save tp cache after pulling
-        if self.release_year > 2021:
-            upgrade = "upgrade={upgrade}/"
-            filename = f"up{upgrade:02}-{climate}-{building_type}.csv"
-        else:
-            upgrade = ""
-            filename = f"{climate}-{building_type}.csv"
-
-        timeseries_aggregate_climate = f"timeseries_aggregates/" \
-                                       f"by_building_america_climate_zone/" \
-                                       f"{upgrade}" \
-                                       f"building_america_climate_zone={climate_zone}/" \
-                                       f"{filename}"
-
-        url = self.paths_amy_2018_v1["end_use_loads"] + \
-              self.paths_amy_2018_v1["resstock"] + \
-              timeseries_aggregate_climate
-        df = pd.read_csv(url, index_col=3)
-        df.index = pd.to_datetime(df.index)
-        return df
-
-    def get_data_resstock_by_climatezone_iecc(self, climate, building_type, upgrade=0):
-        """Pulls CSV"""
-
-        filename = f"up{upgrade:02}-{climate.lower()}-{building_type}.csv"
-        timeseries_aggregate_climate = f"timeseries_aggregates/" \
-                                       f"by_ashrae_iecc_climate_zone_2004/" \
-                                       f"upgrade={upgrade}/" \
-                                       f"ashrae_iecc_climate_zone_2004={climate.upper()}/" \
-                                       f"{filename}"
-
-        url = self.paths_amy_2018_v1["end_use_loads"] + \
-              self.paths_amy_2018_v1["resstock"] + \
-              timeseries_aggregate_climate
-
-        df = pd.read_csv(url, index_col=3)
-        df.index = pd.to_datetime(df.index)
-        return df
-
-    def get_data_resstock_by_state(self, state, building_type, upgrade=0):
+    def get_data_by_state(self, sector, state, building_type, upgrade=0):
         """Pulls CSV"""
         state = state.upper()
+        sector = sector.lower()
 
         if self.release_year > 2021:
-            upgrade = "upgrade={upgrade}/"
+            upgrade = f"upgrade={upgrade}/"
             filename = f"up{upgrade:02}-{state.lower()}-{building_type}.csv"
         else:
             upgrade = ""
@@ -525,17 +441,20 @@ class API:
                                      f"{filename}"
 
         url = self.paths_amy_2018_v1["end_use_loads"] + \
-              self.paths_amy_2018_v1["resstock"] + \
+              self.paths_amy_2018_v1[sector] + \
               timeseries_aggregate_state
         try:
-            df = pd.read_csv(url, index_col=3)
+            df = pd.read_csv(url, index_col=["timestamp"])
         except Exception as err:
             raise Exception(f"{err} (URL='{url}')")
         df.index = pd.to_datetime(df.index)
         return df
 
-    def get_data_resstock_by_county(self, state, building_type, county_gisjoin=None, county_name=None):
+    def get_data_by_county(self, sector, state, building_type, county_gisjoin=None, county_name=None):
         """Pulls CSV"""
+        state = state.upper()
+        sector = sector.lower()
+
         if county_name and not county_gisjoin:
             county_gisjoin = self.get_county_gisjoin_name(county_name=county_name, state=state)
 
@@ -546,86 +465,69 @@ class API:
                                       f"{filename}"
 
         url = self.paths_amy_2018_v1["end_use_loads"] + \
-              self.paths_amy_2018_v1["resstock"] + \
+              self.paths_amy_2018_v1[sector] + \
               timeseries_aggregate_county
         try:
-            df = pd.read_csv(url, index_col=2)
+            df = pd.read_csv(url, index_col=["timestamp"])
         except Exception as err:
             raise Exception(f"{err} (URL='{url}')")
         df.index = pd.to_datetime(df.index)
         return df
 
-    def get_data_comstock_by_climatezone(self, climate, building_type, upgrade=0):
+    def get_data_by_climate_ba(self, sector, climate, building_type, upgrade=0):
         """Pulls CSV"""
-        climate = climate.lower()
+        climate_zone = climate.lower()
+        sector = sector.lower()
 
         # for some reason "Very Cold" climate zone naming is set up differently
         if climate == "very-cold":
             climate = "very_cold"
+            climate_zone = "Very%20Cold"
 
-        filename = f"up{upgrade:00}-{climate}-{building_type}.csv"
-        timeseries_aggregate_climate = f"timeseries_aggregates/" \
-                                       f"by_building_america_climate_zone/" \
-                                       f"{filename}"
+        if self.release_year > 2021:
+            upgrade = f"upgrade={upgrade}/"
+            filename = f"up{upgrade:02}-{climate}-{building_type}.csv"
+            timeseries_aggregate_climate = f"timeseries_aggregates/" \
+                                           f"by_building_america_climate_zone/" \
+                                           f"{upgrade}" \
+                                           f"building_america_climate_zone={climate_zone}/" \
+                                           f"{filename}"
+        else:
+            filename = f"{climate}-{building_type}.csv"
+            timeseries_aggregate_climate = f"timeseries_aggregates/" \
+                                           f"by_building_america_climate_zone/" \
+                                           f"{filename}"
 
         url = self.paths_amy_2018_v1["end_use_loads"] + \
-              self.paths_amy_2018_v1["comstock"] + \
+              self.paths_amy_2018_v1[sector] + \
               timeseries_aggregate_climate
-        df = pd.read_csv(url, index_col=2)
+
+        df = pd.read_csv(url, index_col=["timestamp"])
         df.index = pd.to_datetime(df.index)
         return df
 
-    def get_data_comstock_by_climatezone_iecc(self, climate, building_type, upgrade=0):
+    def get_data_by_climate_iecc(self, sector, climate, building_type, upgrade=0):
         """Pulls CSV"""
+        climate = climate.upper()
+        sector = sector.lower()
 
-        filename = f"up{upgrade:00}-{climate.lower()}-{building_type}.csv"
+        if self.release_year > 2021: # Note that comstock does not have any iecc climate data for 2022
+            upgrade = f"upgrade={upgrade}/"
+            filename = f"up{upgrade:02}-{climate}-{building_type}.csv"
+        else:
+            upgrade = ""
+            filename = f"{climate}-{building_type}.csv"
+
         timeseries_aggregate_climate = f"timeseries_aggregates/" \
                                        f"by_ashrae_iecc_climate_zone_2004/" \
+                                       f"{upgrade}" \
+                                       f"ashrae_iecc_climate_zone_2004={climate.upper()}/" \
                                        f"{filename}"
 
         url = self.paths_amy_2018_v1["end_use_loads"] + \
-              self.paths_amy_2018_v1["comstock"] + \
+              self.paths_amy_2018_v1[sector] + \
               timeseries_aggregate_climate
 
-        df = pd.read_csv(url, index_col=2)
-        df.index = pd.to_datetime(df.index)
-        return df
-
-    def get_data_comstock_by_state(self, state, building_type, upgrade=0):
-        """Pulls CSV"""
-        state = state.upper()
-
-        filename = f"up{upgrade:02}-{state.lower()}-{building_type}.csv"
-        timeseries_aggregate_state = f"timeseries_aggregates/" \
-                                     f"by_state/" \
-                                     f"upgrade={upgrade}/" \
-                                     f"state={state}/" \
-                                     f"{filename}"
-
-        url = self.paths_amy_2018_v1["end_use_loads"] + \
-              self.paths_amy_2018_v1["comstock"] + \
-              timeseries_aggregate_state
-        df = pd.read_csv(url, index_col=3)
-        df.index = pd.to_datetime(df.index)
-        return df
-
-    def get_data_comstock_by_county(self, state, building_type, county_gisjoin=None, county_name=None):
-        """Pulls CSV"""
-        if not county_gisjoin and county_name:
-            county_gisjoin = self.get_county_gisjoin_name(county_name=county_name, state=state)
-
-        filename = f"{county_gisjoin.lower()}-{building_type.lower()}.csv"
-        timeseries_aggregate_county = f"timeseries_aggregates/" \
-                                      f"by_county/" \
-                                      f"state={state.upper()}/" \
-                                      f"{filename}"
-
-        url = self.paths_amy_2018_v1["end_use_loads"] + \
-              self.paths_amy_2018_v1["comstock"] + \
-              timeseries_aggregate_county
-        try:
-            df = pd.read_csv(url, index_col=2)
-        except Exception as err:
-            raise Exception(f"{err} (URL='{url}')")
+        df = pd.read_csv(url, index_col=["timestamp"])
         df.index = pd.to_datetime(df.index)
         return df

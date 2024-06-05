@@ -18,11 +18,26 @@ def __():
 
 @app.cell
 def __():
+    from sg2t.io.loadshapes.nrel.naming import BUILDING_TYPES, HOME_TYPES
+    return BUILDING_TYPES, HOME_TYPES
+
+
+@app.cell
+def __(BUILDING_TYPES):
+    BUILDING_TYPES
+    return
+
+
+@app.cell
+def __():
     # Configuration 
-    sector = "ResStock"
-    state = "CA"
-    county = "Alameda"
-    return county, sector, state
+    metadata = {
+        "sector" : "ResStock",
+        "state" : "CA",
+        "county_name" : "Alameda",
+        "building_type" : "single-family_detached"
+        }
+    return metadata,
 
 
 @app.cell
@@ -33,125 +48,127 @@ def __(API):
 
 
 @app.cell
-def __(api, county, state):
-    # df = api.get_data_comstock_by_county(state=state, county_name=county, building_type="largehotel")
-
-    df = api.get_data_resstock_by_county(state=state, county_name=county, building_type="single-family_detached")
-    return df,
-
-
-@app.cell
-def __():
-    #df.plot(y=["out.site_energy.total.energy_consumption"])
-    return
-
-
-@app.cell
-def __(api):
-    # to get SF for normalization
-    meta = api.get_metadata("resstock") # takes a while
-    return meta,
-
-
-@app.cell
-def __(df):
-    # adjust data cols and index to prep to merge with metadata
-    df.rename(columns=
-            {
-                "in.county": "county",
-                "in.geometry_building_type_recs": "building_type", # resstock
-                "in.building_type": "building_type", # comstock
-            },
-                inplace=True
-            )
-    return
-
-
-@app.cell
-def __(api, county, df, meta, state):
-    # get SF per build type
-    area = meta.groupby(["county","building_type"]).sum()
-    area.columns = ["floor_area[sf]"]
-    area.reset_index(inplace=True)
-
-    # get county puma
-    puma = api.get_county_gisjoin_name(county, state)
-
-    # sort SF by county and building type
-    area_ = area[area["county"]== puma]
-    area_.set_index(["county","building_type"],inplace=True)
-
-    # join data with SF metadata 
-    df.reset_index(inplace=True)
-    df.set_index(["county","building_type"], inplace=True)
-    data = df.join(area_)
-
-    # print(df[df["in.county"]==puma]["in.building_type"].unique())
-
-    dt = 0.25
-    columns = []
-    for column in data.columns:
-        if column.endswith("consumption"):
-            data[column] = data[column] / data["floor_area[sf]"] / dt
-        columns.append(column.replace("consumption","consumption[kW/sf]"))
-
-    data.columns = columns
-    data.drop("floor_area[sf]",axis=1,inplace=True)
-    data.reset_index(inplace=True)
-    data.set_index(["county","building_type","timestamp"],inplace=True)
-    data.sort_index(inplace=True)
-    return area, area_, column, columns, data, dt, puma
-
-
-@app.cell
-def __(data):
-    data["out.site_energy.total.energy_consumption[kW/sf]"]
-    return
-
-
-@app.cell
-def __(data):
-    # plot and compare
-    # y is power intensity
-    data.plot(y=["out.site_energy.total.energy_consumption[kW/sf]"])
-    return
-
-
-@app.cell
-def __(BuildStock, api, county, sector, state):
-    # Pass through kwargs to API
+def __(api, metadata):
+    # Pull data first
     # Needs:
-    # - state and building type
-    # - state and county and building type
-    # - climate and building type
+    # - By state: sector, state and building type
+    # - By county: sector, state and county and building type
+    # - By climate: sector, climate and building type
+    dataset = api.get_data_by_county(**metadata)
+    return dataset,
 
-    # if building type not provided, return all?
-    ## for now, take building type and return one by one
-    ## if user wants more, loops over method with diff btypes <<<<<------
 
-    res = BuildStock(api=api, 
-                     sector=sector, 
-                     state=state, 
-                     county=county, 
-                     building_type="single-family_detached")
+@app.cell
+def __(BuildStock, dataset, metadata):
+    res = BuildStock(data=dataset, metadata=metadata) # instantiate with dataframe with index as dt timestamp
     return res,
 
 
 @app.cell
 def __(res):
-    res.get_data()
+    res.data.head(1)
     return
 
 
 @app.cell
-def __(county, res, state):
-    res.normalize_by_sqft("resstock", county, state)
+def __(res):
+    res.normalize_by_sqft() # can only do for county data (for now?)
+    return
+
+
+@app.cell
+def __(res):
+    res.data.plot(y=["out.site_energy.total.energy_consumption"])
+    return
+
+
+@app.cell
+def __(res):
+    res.data_normalized.plot(y=["out.site_energy.total.energy_consumption[kW/sf]"])
     return
 
 
 @app.cell
 def __():
+    # by climate
     return
+
+
+@app.cell
+def __():
+    metadata_com = {
+        "sector" : "comstock",
+        "climate" : "hot-dry",
+        "building_type" : "largehotel"
+    }
+
+    # metadata_res = {
+    #     "sector" : "ResStock",
+    #     "climate" : "hot-dry",
+    #     "building_type" : "single-family_detached"
+    #     }
+    return metadata_com,
+
+
+@app.cell
+def __(api, metadata_com):
+    data_com_cli = api.get_data_by_climate_ba(**metadata_com)
+    return data_com_cli,
+
+
+@app.cell
+def __(data_com_cli):
+    data_com_cli
+    return
+
+
+@app.cell
+def __(BuildStock, data_com_cli, metadata_com):
+    com = BuildStock(data=data_com_cli, metadata=metadata_com)
+    return com,
+
+
+@app.cell
+def __(com):
+    com.normalize_by_sqft()
+    return
+
+
+@app.cell
+def __():
+    metadata_test = {
+        "sector" : "comstock",
+        "building_type" : "largehotel"
+    }
+    return metadata_test,
+
+
+@app.cell
+def __(BuildStock, data_com_cli, metadata_test):
+    com_test = BuildStock(data=data_com_cli, metadata=metadata_test)
+    return com_test,
+
+
+@app.cell
+def __():
+    # the way I'm planning to do it doesn't work because I can't pass a new kwarg to get data now, can I? or maybe I can make it a new kwargs... ugh
+
+    # doesn't make sense to have incompatible climate, but i either ask users to fix it by setting up a check (either county/state or climate in there) or I change the system
+    return
+
+
+app._unparsable_cell(
+    r"""
+    # by state
+    com_state_meta = {
+        \"sector\" : \"comstock\",
+        \"state\" : \"MI\",
+        \"building_type\" : \"largehotel\"
+    }
+    com_state = 
+    """,
+    name="__"
+)
 
 
 if __name__ == "__main__":
