@@ -1,8 +1,12 @@
 """Class for obtaining loadshapes from the SPEECh model.
 https://github.com/slacgismo/speech/tree/main.
 """
-
+import os
+from pathlib import Path
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
 from sg2t.transportation.speech import DataSetConfigurations
 from sg2t.transportation.speech import SPEECh
 from sg2t.transportation.speech import SPEEChGeneralConfiguration
@@ -14,7 +18,14 @@ class EV:
         self.total_evs = total_evs # Input number of EVs in simulation
         self.weekday_option = 'weekday'
         self.dataset = 'Original16' # 'NewData' not implemented yet
-        self.path_to_data = 'inputs/'
+        # TODO: simplify below
+        path =  os.path.dirname(os.path.abspath(__file__))
+        self.path_to_data = os.path.abspath(os.path.join(
+            path,
+            os.pardir,
+            os.pardir,
+            "transportation/data/")
+        ) +"/"
         self.ng = 16 # default number of groups for Original16 dataset
         self.g_weights = None # weight for each group
         # self.b_weights = None # weight for each behavior
@@ -84,3 +95,24 @@ class EV:
         loadshapes["Hour"] = pd.date_range("00:00", "23:45", freq="1H").hour
         loadshapes.set_index('Hour', inplace=True)
         return loadshapes
+
+    def plot_loadshapes(self, figsize=(8, 5)):
+        x = self.loadshapes.index
+
+        scaling = 1 / 1000
+        unit = 'MW'
+        if np.max(
+                scaling * self.config.total_load_segments) > 1000:  # if any scaled value is over 1000
+            scaling = (1 / 1000) * (1 / 1000)
+            unit = 'GW'
+
+        plt.figure(figsize=figsize)
+        for key in self.loadshapes.columns:
+            val = self.loadshapes[key]
+            plt.plot(x, scaling * val, label=key)
+
+        plt.legend()
+        plt.xlim([0, np.max(x)])
+
+        plt.ylabel(unit)
+        plt.xlabel('Hour')
