@@ -1,4 +1,4 @@
-"""Module for ResStock and Comstock Building data.
+"""Module for ResStock and ComStock Building data.
 Data can be found at https://resstock.nrel.gov/datasets
 """
 
