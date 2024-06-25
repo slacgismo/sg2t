@@ -24,79 +24,21 @@ class BuildStock(IOBase):
      dataset into sg2t tools.
     """
     def __init__(self,
-                 data, # TODO: update docstrings
-                 metadata,  # TODO: implement or remove
-                 api=None,
-                 config_name="config.ini", # TODO: implement or remove
-                 config_key="io.nrel.api", # TODO: implement or remove
+                 data,
+                 metadata,
+                 api=None
                  ):
         """ ResStock object initialization.
-
-        Parameters
-        ----------
-        config_name : str
-            Name of configuration file in sg2t.config, optional.
-
-        config_key : str
-            Key in config corresponding to this class, required if
-            config_name is given.
-
-        metadata_file : str
-            Full path to JSON file containing the metadata for this
-             type of data.
+        # TODO: update docstrings
         """
-        # TODO: drop base class?
-        # super().__init__(config_name, config_key, metadata_file)
         self.raw_data = data
-        # self.kwargs = kwargs
-        # self.weather_gisjoint = self.load_weather_location()
         self.data = self._format_data()
         self.data_normalized = None
         self.metadata = metadata
         self.api = api
-        self.validate_metadata()
-
-    # def load_weather_location(self):
-    #     # TODO: check that metadata exists
-    #     if not self.metadata:
-    #         return "None"
-    #     try:
-    #         gisj_metadata = self.metadata["file"]["GISJOINT ID"]
-    #         return gisj_metadata
-    #     except KeyError:
-    #         return "None"
-
-    def validate_metadata(self):
-        # TODO: also check that there's no overlap? (e.g. both county and climate keys are there)
-        try:
-            assert "sector" in self.metadata
-            assert ("state" in self.metadata) or \
-                   ("state" in self.metadata and "county" in self.metadata ) or \
-                   ("climate" in self.metadata)
-        except AssertionError:
-            print("Please specify the sector in the metadata, and: \n \
-                  - the state, or \n \
-                  - the state and county, or \n \
-                  - the climate")
+        self._validate_metadata()
 
     def _format_data(self):
-        """Changes the format of the loaded tmy3 data self.data to follow
-        a standard format with standard column names. See `mapping.py`.
-
-        This only reorders the columns, putting required ones first, and others
-        next, and removes redundant/unused columns.
-        """
-        # self.keys_map = get_map(self.metadata_file)
-        # # Save original dataframe
-        # raw_data = self.data
-        # # Create new dataframe
-        # cols = list(self.keys_map.keys())
-        # data = pd.DataFrame(columns=cols)
-        # for key in list(self.keys_map.keys()):
-        #     print(key, self.keys_map[key])
-        #     data[key] = raw_data[self.keys_map[key]]
-        #
-        # self.data = data
 
         self.data = self.raw_data.copy()
 
@@ -115,6 +57,20 @@ class BuildStock(IOBase):
 
         return self.data
 
+    def _validate_metadata(self):
+        # TODO: do I actually need this
+        keys_set = set(self.metadata.keys())
+        try:
+            assert keys_set == {'sector', 'state', 'building_type'}  or \
+                   keys_set == {'sector', 'state', 'county_name', 'building_type'}  or \
+                   keys_set == {'sector', 'climate', 'building_type'}
+
+        except AssertionError:
+            print("Please specify the sector in the metadata, and: \n \
+                  - the state, or \n \
+                  - the state and county, or \n \
+                  - the climate")
+
     def normalize_by_sqft(self):
         """ Normalize county-level data by square footage
         and return energy/SF for each building type
@@ -122,10 +78,12 @@ class BuildStock(IOBase):
         if "county" not in self.data.columns:
             raise Exception("Must have county level data specified to call this method.")
 
-        # create API object # TODO: maybe change how this is implemented
+        # create API object
+        # TODO: maybe change how this is implemented
+        # TODO: maybe can pass metadata if cached to speed it up
         self.api = self.api if self.api else API()
 
-        # TODO: why does this take 17s?
+        # TODO: speed up (takes 17s)
         # get SF per build type
         meta = self.api.get_metadata(self.metadata["sector"])
         area = meta.groupby(["county", "building_type"]).sum()
@@ -145,7 +103,7 @@ class BuildStock(IOBase):
         self.data_normalized.set_index(["county", "building_type"], inplace=True)
         self.data_normalized = self.data_normalized.join(area)
 
-        dt = 0.25 # this shouldn't change for ResStock and ComStock, TODO: confirm this
+        dt = 0.25 # same for ResStock and ComStock
         columns = []
         for column in self.data_normalized.columns:
             if column.endswith("consumption"):
@@ -229,25 +187,9 @@ class API:
     AWS S# bucket.
     https://data.openei.org/submissions/4520
     """
-    def __init__(self,
-                 # source: str,
-                 config_name="config.ini",
-                 config_key="io.nrel.api"
-                 ):
+    def __init__(self):
         """ API object initialization
-
-        Parameters
-        ----------
-        source: str
-            Desired source of data to pull. Currently supports: ResStock, ComStock.
-
-        config_name : str
-            Name of configuration file in sg2t.config or cache directory to obtain API path settings.
         """
-        self.source = None
-        self.config_name = config_name
-        self.config_key = config_key
-        self.config = self.load_config(self.config_name, self.config_key)
         # API paths
         # 2021 release has county breakdown
         # 2021 release does *not* take upgrades as input
@@ -267,63 +209,6 @@ class API:
 
         # Geographic information
         self.df_geoinfo = self.get_geoinfo()
-
-        # # API options
-        # self.api_options = {
-        #             "resstock" :
-        #                 { "state" : self.get_data_resstock_by_state, # state, hometype
-        #                   "county" : self.get_data_resstock_by_county, # state, county, hometype
-        #                   "climate-ba" : self.get_data_resstock_by_climatezone,  # climate, hometype
-        #                   "climate-iecc" : self.get_data_resstock_by_climatezone_iecc, # climate, hometype
-        #                   },
-        #
-        #             "comstock" :
-        #                 { "state" : self.get_data_comstock_by_state, # state, hometype
-        #                   "county" : self.get_data_comstock_by_county, # state, county, hometype
-        #                   "climate-ba" : self.get_data_comstock_by_climatezone,  # climate, hometype
-        #                   "climate-iecc" : self.get_data_comstock_by_climatezone_iecc, # climate, hometype
-        #                   },
-        #        }
-
-    # def get_data(self, sector, building_type, state=None, county=None, climate=None):
-    #     sector = sector.lower()
-    #
-    #     if (state and climate) or (county and climate):
-    #         # if state and county then county level is taken
-    #         raise "Please specify the query type (state, state/county, or climate)."
-    #
-    #     # Get dataframe
-    #     if state:
-    #         if county:
-    #             return self.api_options[sector]["county"](state=state, county_name=county, building_type=building_type)
-    #         else:
-    #             return self.api_options[sector]["state"](state=state, building_type=building_type)
-    #     elif climate:
-    #         if climate in self.climate_zones_ba:
-    #             return self.api_options[sector]["climate-ba"](climate=climate, building_type=building_type)
-    #         elif climate in self.climate_zones_iecc:
-    #             return self.api_options[sector]["climate-iecc"](climate=climate, building_type=building_type)
-    #         else:
-    #             raise Exception("Invalid option. Please pass either state, county, or climate info.")
-
-    def load_config(self, config_name=None, key=None):
-        """Load configuration.
-
-        PARAMETERS
-        ----------
-        config_name : str
-            Name of configuration file in sg2t.config, optional.
-
-        key : str
-            Key in config corresponding to this class, required if
-            config_name is given.
-
-        RETURNS
-        -------
-        config : dict
-            Configuration dict, if any, otherwise None.
-        """
-        return load_config(config_name, key)
 
     def get_geoinfo(self):
         # This file is identical between ResStock and Comstock
