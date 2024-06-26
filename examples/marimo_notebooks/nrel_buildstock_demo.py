@@ -49,19 +49,19 @@ def __(mo):
 
         # by state
         state = "CA"
-        df = api.get_data_by_state(sector, by=state, type=btype)
+        df = api.get_data_by_state(sector, state=state, building_type=btype)
 
         # by county
         county = "Alameda"
-        df = api.get_data_by_county(sector, by=state, type=btype, county_name=county)
+        df = api.get_data_by_county(sector, state=state, building_type=btype, county_name=county)
 
         # By climate (Building America)
         climate = "hot-dry"
-        df = api.get_data_by_climate_ba(sector, by=climate, type=btype)
+        df = api.get_data_by_climate_ba(sector, climate=climate, building_type=btype)
 
         # or for IECC
         climate = "1A"
-        df = api.get_data_by_climate_iecc(sector, by=climate, type=btype)
+        df = api.get_data_by_climate_iecc(sector, climate=climate, building_type=btype)
         ```
         """
     )
@@ -75,9 +75,18 @@ def __(mo):
 
 
 @app.cell
-def __(BUILDING_TYPES, HOME_TYPES):
-    print("Residential home types: ", HOME_TYPES)
-    print("Commercial building types: ", BUILDING_TYPES)
+def __(BUILDING_TYPES, HOME_TYPES, mo):
+    mo.md(
+        f"""
+        Residential home types:
+
+        {HOME_TYPES},
+
+        Commercial building types: 
+
+        {BUILDING_TYPES}
+        """
+    )
     return
 
 
