@@ -293,7 +293,7 @@ class API:
         if county_name and state:
             try:
                 return \
-                self.df_geoinfo[(self.df_geoinfo["county_name"] == county_name.capitalize()) & \
+                self.df_geoinfo[(self.df_geoinfo["county_name"] == county_name.title()) & \
                                 (self.df_geoinfo["state_abbreviation"] == state.upper())].index[0]
             except IndexError as e:
                 print(e)
