@@ -13,10 +13,6 @@ project = 'slac-gismo-grid-tools'
 copyright = '2022, Sara Miskovich'
 author = 'Sara Miskovich'
 
-# The full version, including alpha/beta/rc tags
-from sg2t import __version__
-release = __version__
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -24,17 +20,12 @@ release = __version__
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'sphinx.ext.inheritance_diagram',
-    'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
-    'sphinx.ext.mathjax',
-    'sphinx_automodapi.automodapi',
-    'sphinx_automodapi.smart_resolver',
-]
+    'sphinx.ext.autodoc'
+    ]
 
 # Add any paths that contain templates here, relative to this directory.
 # templates_path = ['_templates']
