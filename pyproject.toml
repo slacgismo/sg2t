@@ -3,7 +3,7 @@ requires = ["setuptools>=64.0", "setuptools-scm[toml]"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "slac-gismo-grid-tools"
+name = "sg2t"
 description = "SLAC GISMo Grid Tools is single core package for grid related data cleaning, manipulation and data science in Python."
 readme = "README.md"
 license.file = "LICENSE"
@@ -12,7 +12,7 @@ authors = [
     { name = "David Chassin", email = "dchassin@slac.stanford.edu" },
     { name = "Mohamed Nijad "},
 ]
-keywords = ["grid", "load modeling", "electrid loadshapes"]
+keywords = ["grid", "load modeling", "electric loadshapes"]
 requires-python = ">=3.6"
 
 dependencies = [
