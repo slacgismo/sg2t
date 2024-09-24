@@ -1,10 +1,11 @@
 name: Tests
 
 on:
-  push:
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch: 
+  # push: # uncomment once test suite is ready
+  # pull_request:
+  #   branches:
+  #     - main
 
 jobs:
   pre_job:
